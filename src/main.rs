@@ -1,4 +1,4 @@
-#![doc = include_str!("../README.md")]
+#![doc = include_str ! ("../README.md")]
 
 #![deny(clippy::all)]
 #![deny(clippy::pedantic)]
@@ -6,128 +6,80 @@
 #![deny(clippy::cargo)]
 #![deny(missing_docs)]
 // ==============================================================
-#![doc(html_root_url = "https://docs.rs/cleaner/0.1.1")]
+#![allow(clippy::module_name_repetitions)]
+// ==============================================================
+#![doc(html_root_url = "https://docs.rs/cleaner/0.2.0")]
 
-use std::env;
-use std::fs::{read_dir, remove_dir_all};
-use std::path::PathBuf;
-use std::process::exit;
+#[macro_use]
+extern crate clap;
+
+use clap::Parser;
+use once_cell::sync::Lazy;
+
+use cli::commands::actions::Action;
+use commands::builds::list_build_artifacts;
+use commands::builds::remove_build_artifacts;
+
+use crate::cli::all_values::AllValues;
+use crate::cli::CLI;
+use crate::cli::commands::Commands;
+use crate::commands::supported::supported_platforms;
+use crate::models::Platform;
+
+//#[doc(hidden)]
+mod cli;
+//#[doc(hidden)]
+mod commands;
+//#[doc(hidden)]
+mod models;
+//#[doc(hidden)]
+mod utils;
 
 #[cfg(test)]
 mod tests;
 
-/// Describes a support project type for cleaning
-#[doc(hidden)]
-struct Project {
-    /// Type of project
-    name: &'static str,
-
-    /// Build artifact folders of project type
-    folders: Vec<&'static str>,
-
-    /// Files and file extensions that marks the project type
-    associated: Vec<&'static str>,
-}
-
-#[doc(hidden)]
-fn main() {
-    const USAGE: &str = "usage: cleaner <path> [-forreals]\n";
-
-    let mut args = env::args().into_iter().skip(1);
-
-    let path = match args.next() {
-        None => {
-            println!("{}", USAGE);
-            exit(-1);
-        }
-        Some(path) => {
-            let path = PathBuf::from(path);
-
-            if !path.exists() {
-                println!("path: \"{}\" - does not exist!\n", path.to_string_lossy());
-                exit(-1);
-            }
-
-            if path.is_file() {
-                println!("path: \"{}\" - is not directory!\n", path.to_string_lossy());
-                exit(-1);
-            }
-
-            path
-        }
-    };
-
-    let for_reals = match args.next() {
-        None => false,
-        Some(for_reals) if for_reals.to_lowercase() == "-forreals" => true,
-        Some(_) => {
-            println!("{}", USAGE);
-            exit(-1);
-        }
-    };
-
-    let projects = vec![
-        Project {
+/// Definition of supported development platforms
+//#[doc(hidden)]
+static PLATFORMS: Lazy<Vec<Platform>> = Lazy::new(|| {
+    // todo: make this configurable by loading from a json definition file
+    vec![
+        Platform {
             name: ".Net",
             folders: vec!["bin", "obj"],
             associated: vec!["sln", "csproj"],
         },
-        Project {
+        Platform {
             name: "Rust",
             folders: vec!["target"],
             associated: vec!["cargo.toml"],
         },
-        Project {
+        Platform {
             name: "Web",
             folders: vec!["node_modules"],
             associated: vec!["package.json"],
         },
-    ];
+    ]
+});
 
-    let mut found = 0;
+/// Cleaner command line parsing and command execution
+//#[doc(hidden)]
+fn main() {
+    let cli = CLI::parse();
 
-    for entry in walkdir::WalkDir::new(path) {
-        let entry = entry.unwrap();
+    println!();
 
-        if entry.file_type().is_dir() {
-            let folder = entry.file_name().to_string_lossy().to_lowercase();
-            let parent = entry.path().parent().unwrap().to_string_lossy().to_lowercase();
-
-            for project in projects.iter().filter(|f| f.folders.contains(&folder.as_str())) {
-                if parent.contains(&folder.as_str()) {
-                    break;
-                }
-
-                if let Ok(files) = read_dir(&parent) {
-                    if files.filter(
-                        |v| if let Ok(file) = v {
-                            let file_name = file.file_name().to_string_lossy().to_lowercase();
-                            let ext = match file.path().extension() {
-                                None => String::default(),
-                                Some(ext) => ext.to_string_lossy().to_lowercase()
-                            };
-
-                            project.associated.contains(&file_name.as_str()) ||
-                                project.associated.contains(&ext.as_str())
-                        } else {
-                            false
-                        }
-                    ).count() > 0 {
-                        found += 1;
-
-                        if for_reals {
-                            match remove_dir_all(entry.path()) {
-                                Ok(_) =>
-                                    println!("[{:04}] {} - {}", found, project.name, parent),
-                                Err(err) =>
-                                    println!("ERR: {} - {}: {}", project.name, entry.path().to_string_lossy(), err)
-                            }
-                        } else {
-                            println!("[{:04}] {} - {}", found, project.name, entry.path().to_string_lossy());
-                        }
-                    }
-                }
+    match &cli.commands {
+        Commands::Builds(builds) => {
+            match builds.action {
+                None |
+                Some(Action::List) =>
+                    list_build_artifacts(&builds.path, &builds.types, &PLATFORMS),
+                Some(Action::Remove) =>
+                    remove_build_artifacts(&builds.path, &builds.types, &PLATFORMS, builds.confirmed)
             }
         }
+        Commands::Supported => supported_platforms(&PLATFORMS)
     }
+
+    println!();
 }
