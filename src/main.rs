@@ -6,7 +6,7 @@
 #![deny(clippy::cargo)]
 #![deny(missing_docs)]
 // ==============================================================
-#![doc(html_root_url = "https://docs.rs/cleaner/0.1.0")]
+#![doc(html_root_url = "https://docs.rs/cleaner/0.1.1")]
 
 use std::env;
 use std::fs::{read_dir, remove_dir_all};
@@ -31,7 +31,7 @@ struct Project {
 
 #[doc(hidden)]
 fn main() {
-    const USAGE: &str = "usage: clean-dist <path> [-forreals]\n";
+    const USAGE: &str = "usage: cleaner <path> [-forreals]\n";
 
     let mut args = env::args().into_iter().skip(1);
 
