@@ -77,6 +77,7 @@ impl<'a> BuildsWalker<'a> {
                                 Some(ext) => ext.to_string_lossy().to_lowercase()
                             };
 
+                            // todo: support wildcards instead
                             platform.associated.contains(&file_name.as_str()) ||
                                 platform.associated.contains(&ext.as_str())
                         } else {

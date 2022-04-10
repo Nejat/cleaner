@@ -83,6 +83,8 @@ fn build_artifacts_handler<F>(
     }
 
     if found == 0 {
+        // todo: "the all platform(s)" is not grammatically correct
+        // todo: add an & for the last listed platform, if more than one platform
         println!("No build artifacts found for the {} platform{}", filter, filter.pluralize("s"));
     }
 }
