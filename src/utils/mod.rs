@@ -43,11 +43,12 @@ pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
                 "Unsupported platform{}: {}", pluralized,
                 unsupported.join(SEPARATOR)
             );
+            eprintln!();
             eprintln!(
                 "Supported Platforms: {}",
                 platforms.iter().map(|p| p.name.to_string()).collect::<Vec<_>>().join(SEPARATOR)
             );
-            println!();
+            eprintln!();
 
             exit(-1);
         }
