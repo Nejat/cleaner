@@ -1,0 +1,19 @@
+[package]
+name = "cleaner"
+version = "0.1.0"
+edition = "2021"
+description = "Cleaner is a utility for cleaning up build artifacts in bulk"
+license = "MIT"
+readme = "README.md"
+include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "README.md"]
+homepage = "https://github.com/Nejat/cleaner"
+repository = "https://github.com/Nejat/cleaner"
+keywords = ["clean", "cleaner", "delete", "build", "artifacts", "thewolf"]
+authors = ["Nejat<nejatoz@gmail.com>"]
+categories = ["command-line-utilities"]
+
+[dependencies]
+walkdir = "2"
+
+[dev-dependencies]
+version-sync = "0.9"
