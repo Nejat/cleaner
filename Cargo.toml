@@ -8,7 +8,7 @@ readme = "README.md"
 include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "README.md"]
 homepage = "https://github.com/Nejat/cleaner"
 repository = "https://github.com/Nejat/cleaner"
-keywords = ["clean", "cleaner", "delete", "build", "artifacts", "thewolf"]
+keywords = ["cleaner", "delete", "build", "artifacts", "thewolf"]
 authors = ["Nejat<nejatoz@gmail.com>"]
 categories = ["command-line-utilities"]
 
