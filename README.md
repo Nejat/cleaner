@@ -25,7 +25,7 @@ _\* requires rust and cargo - [Rust Install Instructions](https://rustup.rs/)_
 ## Usage
 
 ```
-cleaner 0.2.0
+cleaner 0.3.0
 Cleaner is a utility for cleaning up build artifacts in bulk
 
 USAGE:
@@ -48,7 +48,7 @@ SUBCOMMANDS:
 
 ```
 > cleaner builds
-cleaner-builds 0.2.0
+cleaner-builds 0.3.0
 Manage build artifacts of supported platforms
 
 USAGE:
@@ -91,7 +91,7 @@ SUBCOMMANDS:
 
 ```
 > cleaner empties
-cleaner-empties 0.2.0
+cleaner-empties 0.3.0
 Manage empty folders
 
 USAGE:
