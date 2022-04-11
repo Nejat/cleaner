@@ -1,4 +1,5 @@
 use std::fs::read_dir;
+use std::process::exit;
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
@@ -37,13 +38,12 @@ impl<'a> Iterator for BuildsWalker<'a> {
                 }
                 Err(err) => {
                     eprint!("Exception while searching \"{}\" for build artifacts: {err}", self.path);
+                    eprintln!();
 
-                    break;
+                    exit(-1);
                 }
             }
         }
-
-        None
     }
 }
 
