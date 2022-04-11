@@ -1,4 +1,4 @@
-use std::fs::remove_dir;
+use std::fs::remove_dir_all;
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::process::exit;
 use std::sync::Once;
@@ -36,7 +36,7 @@ pub fn remove_empties(
                 Response::Yes { defaulted } => {
                     if !defaulted { println!(); }
 
-                    remove_dir(empty).map_err(|err| format!("{err}"))?;
+                    remove_dir_all(empty).map_err(|err| format!("{err}"))?;
 
                     if confirmed { println!("  - {msg} - removed"); }
                 }
