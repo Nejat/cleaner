@@ -1,7 +1,7 @@
 use crate::cli::commands::builds::Builds;
 
-pub mod builds;
 pub mod actions;
+pub mod builds;
 
 /// `cleaner` subcommands defined
 #[derive(Debug, Eq, PartialEq, Subcommand)]

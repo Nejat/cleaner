@@ -29,8 +29,10 @@ impl<'a> Iterator for BuildsWalker<'a> {
 
             match next {
                 Ok(entry) => {
-                    if let Some(artifacts) = self.build_artifacts(&entry) {
-                        return Some(artifacts);
+                    let artifacts = self.build_artifacts(&entry);
+
+                    if artifacts.is_some() {
+                        return artifacts;
                     }
                 }
                 Err(err) => {

@@ -11,7 +11,7 @@ use crate::utils::question::{DefaultAnswer, Response, yes_no_question};
 /// Lists matching build artifacts
 pub fn list_build_artifacts(path: &str, filter: &AllValues, platforms: &[Platform]) {
     build_artifacts_handler(
-        "list", &path, filter, platforms,
+        "list", path, filter, platforms,
         |_, msg| {
             println!("  - {msg}");
 
@@ -25,7 +25,7 @@ pub fn remove_build_artifacts(
     path: &str, filter: &AllValues, platforms: &[Platform], confirmed: bool,
 ) {
     build_artifacts_handler(
-        "remove", &path, filter, platforms,
+        "remove", path, filter, platforms,
         move |artifact, msg| {
             let mut response = Response::Yes { defaulted: true };
 
@@ -35,18 +35,13 @@ pub fn remove_build_artifacts(
 
             match response {
                 Response::Yes { defaulted } => {
-                    if !defaulted {
-                        println!();
-                    }
+                    if !defaulted { println!(); }
 
                     remove_dir_all(&artifact.folder).map_err(|err| format!("{err}"))?;
 
-                    if confirmed {
-                        println!("  - {msg} - removed");
-                    }
+                    if confirmed { println!("  - {msg} - removed"); }
                 }
-                Response::No { defaulted } if !defaulted =>
-                    println!(),
+                Response::No { defaulted } if !defaulted => println!(),
                 Response::No { .. } => {}
             }
 
@@ -57,7 +52,7 @@ pub fn remove_build_artifacts(
 
 /// Common build artifact handling logic
 fn build_artifacts_handler<F>(
-    action: &str, path: &&str, filter: &AllValues, platforms: &[Platform], handler: F,
+    action: &str, path: &str, filter: &AllValues, platforms: &[Platform], handler: F,
 )
     where F: Fn(&BuildArtifacts, &str) -> Result<(), String>
 {

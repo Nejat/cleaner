@@ -1,7 +1,8 @@
-use once_cell::sync::Lazy;
+use std::fmt::{Display, Formatter};
 use std::io::{Read, stdin, stdout, Write};
 use std::process::exit;
-use std::fmt::{Display, Formatter};
+
+use once_cell::sync::Lazy;
 
 /// Matches new line input
 static NEW_LINE: Lazy<u8> = Lazy::new(|| u8::try_from('\n').unwrap());
