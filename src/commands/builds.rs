@@ -1,13 +1,13 @@
 use std::fs::remove_dir_all;
 use std::path::MAIN_SEPARATOR;
 use std::process::exit;
-use std::sync::Once;
+
+use inquire::Confirm;
 
 use crate::{AllValues, Platform};
 use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
 use crate::utils::{validate_path, validate_platforms_filter};
-use crate::utils::question::{DefaultAnswer, Response, yes_no_question};
 
 /// Lists matching build artifacts
 pub fn list_build_artifacts(path: &str, filter: &AllValues, platforms: &[Platform]) {
@@ -28,22 +28,27 @@ pub fn remove_build_artifacts(
     build_artifacts_handler(
         "remove", path, filter, platforms,
         move |artifact, msg| {
-            let mut response = Response::Yes { defaulted: true };
+            let mut do_it = confirmed;
 
             if !confirmed {
-                response = yes_no_question(&format!("  - remove {msg}"), DefaultAnswer::No);
+                let confirmation = Confirm::new(&format!("remove {msg}"))
+                    .with_default(false)
+                    .with_placeholder("N")
+                    .prompt();
+
+                match confirmation {
+                    Ok(answer) => do_it = answer,
+                    Err(err) => {
+                        eprintln!("Exception processing input: {}", err);
+                        eprintln!();
+                        exit(-1);
+                    }
+                }
             };
 
-            match response {
-                Response::Yes { defaulted } => {
-                    if !defaulted { println!(); }
-
-                    remove_dir_all(&artifact.folder).map_err(|err| format!("{err}"))?;
-
-                    if confirmed { println!("  - {msg} - removed"); }
-                }
-                Response::No { defaulted } if !defaulted => println!(),
-                Response::No { .. } => {}
+            if do_it {
+                remove_dir_all(&artifact.folder).map_err(|err| format!("{err}"))?;
+                if confirmed { println!("  - {msg} - removed"); }
             }
 
             Ok(())
@@ -62,13 +67,10 @@ fn build_artifacts_handler<F>(
 
     let max_width = platforms.iter().map(|p| p.name.len()).max().unwrap_or_default();
     let mut found = 0;
-    let notify_once = Once::new();
 
     for entry in BuildsWalker::new(filter, path, platforms) {
         let offset = if path.ends_with(MAIN_SEPARATOR) { 0 } else { 1 };
-        let output = format!("{:max$} > {}", entry.name, &entry.folder[path.len() + offset..], max = max_width);
-
-        notify_once.call_once(|| println!("Found\n"));
+        let output = format!("[{:max$}] {}", entry.name, &entry.folder[path.len() + offset..], max = max_width);
 
         if let Err(err) = handler(&entry, &output) {
             eprintln!("\nException occurred while {action}ing {output}:\n  {err}");

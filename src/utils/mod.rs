@@ -3,8 +3,6 @@ use std::process::exit;
 
 use crate::{AllValues, Platform};
 
-pub mod question;
-
 /// Separator for creating a list for string values for display
 pub const SEPARATOR: &str = ", ";
 

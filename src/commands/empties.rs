@@ -1,10 +1,10 @@
 use std::fs::remove_dir_all;
 use std::path::{MAIN_SEPARATOR, PathBuf};
 use std::process::exit;
-use std::sync::Once;
+
+use inquire::Confirm;
 
 use crate::commands::walkers::EmptiesWalker;
-use crate::utils::question::{DefaultAnswer, Response, yes_no_question};
 use crate::utils::validate_path;
 
 /// Lists empty folders
@@ -26,22 +26,28 @@ pub fn remove_empties(
     empties_handler(
         "remove", path, show_hidden,
         move |empty, msg| {
-            let mut response = Response::Yes { defaulted: true };
+            let mut do_it = confirmed;
 
             if !confirmed {
-                response = yes_no_question(&format!("  - remove {msg}"), DefaultAnswer::No);
+                let confirmation = Confirm::new(&format!("remove {msg}"))
+                    .with_default(false)
+                    .with_placeholder("N")
+                    .prompt();
+
+                match confirmation {
+                    Ok(answer) => do_it = answer,
+                    Err(err) => {
+                        eprintln!("Exception processing input: {}", err);
+                        eprintln!();
+                        exit(-1);
+                    }
+                }
             };
 
-            match response {
-                Response::Yes { defaulted } => {
-                    if !defaulted { println!(); }
+            if do_it {
+                remove_dir_all(empty).map_err(|err| format!("{err}"))?;
 
-                    remove_dir_all(empty).map_err(|err| format!("{err}"))?;
-
-                    if confirmed { println!("  - {msg} - removed"); }
-                }
-                Response::No { defaulted } if !defaulted => println!(),
-                Response::No { .. } => {}
+                if confirmed { println!("  - {msg} - removed"); }
             }
 
             Ok(())
@@ -58,13 +64,10 @@ fn empties_handler<F>(
     validate_path(path);
 
     let mut found = 0;
-    let notify_once = Once::new();
 
     for entry in EmptiesWalker::new(path, show_hidden) {
         let offset = if path.ends_with(MAIN_SEPARATOR) { 0 } else { 1 };
         let output = entry.to_string_lossy()[path.len() + offset..].to_string();
-
-        notify_once.call_once(|| println!("Found\n"));
 
         if let Err(err) = handler(&entry, &output) {
             eprintln!("\nException occurred while {action}ing {output}:\n  {err}");
