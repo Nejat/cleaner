@@ -123,8 +123,8 @@ Lists all supported development platforms
 ```
 
 Platform: .Net
-  Build Artifacts: bin, obj
-  Matched On: sln, csproj
+  Build Artifacts: bin & obj
+  Matched On: sln & csproj
 
 Platform: Rust
   Build Artifacts: target

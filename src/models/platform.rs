@@ -9,3 +9,9 @@ pub struct Platform<'a> {
     /// Associated files and file extensions that mark the platform
     pub associated: Vec<&'a str>,
 }
+
+impl<'a> AsRef<str> for Platform<'a> {
+    fn as_ref(&self) -> &str {
+        self.name
+    }
+}

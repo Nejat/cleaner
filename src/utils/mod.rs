@@ -1,10 +1,36 @@
 use std::path::PathBuf;
 use std::process::exit;
+use std::sync::Once;
 
 use crate::{AllValues, Platform};
 
 /// Separator for creating a list for string values for display
-pub const SEPARATOR: &str = ", ";
+const SEPARATOR: &str = ", ";
+
+pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
+    let mut output = String::default();
+    let mut add_separator = false;
+    let skip_first = Once::new();
+
+    for item in source.iter().take(source.len() - 1) {
+        if add_separator { output.push_str(SEPARATOR); }
+
+        skip_first.call_once(|| add_separator = true);
+
+        output.push_str(item.as_ref());
+    }
+
+    if let Some(last) = source.last() {
+        if !output.is_empty() {
+            output.push_str(" & ");
+        }
+
+        output.push_str(last.as_ref());
+    }
+
+
+    output
+}
 
 /// Validates a given path exists and it is a folder
 pub fn validate_path(path: &str) {
@@ -26,26 +52,15 @@ pub fn validate_path(path: &str) {
 /// Validates al platform filters are supported platforms, case sensitive
 pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
     if let AllValues::Values { values } = filter {
-        let unsupported = values.iter().filter_map(
-            |v| if platforms.iter().all(|p| p.name != v) {
-                Some(v.to_string())
-            } else {
-                None
-            }
-        ).collect::<Vec<_>>();
+        let unsupported = values.iter()
+            .filter(|v| platforms.iter().all(|p| p.name != *v)).collect::<Vec<_>>();
 
         if !unsupported.is_empty() {
             let pluralized = if unsupported.len() > 1 { "s" } else { "" };
 
-            eprintln!(
-                "Unsupported platform{}: {}", pluralized,
-                unsupported.join(SEPARATOR)
-            );
+            eprintln!("Unsupported platform{}: {}", pluralized, list_output(&unsupported));
             eprintln!();
-            eprintln!(
-                "Supported Platforms: {}",
-                platforms.iter().map(|p| p.name.to_string()).collect::<Vec<_>>().join(SEPARATOR)
-            );
+            eprintln!("Supported Platforms: {}", list_output(platforms));
             eprintln!();
 
             exit(-1);

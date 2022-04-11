@@ -1,7 +1,7 @@
 use std::sync::Once;
 
 use crate::Platform;
-use crate::utils::SEPARATOR;
+use crate::utils::list_output;
 
 pub fn supported_platforms(platforms: &[Platform]) {
     let mut separator = false;
@@ -14,13 +14,7 @@ pub fn supported_platforms(platforms: &[Platform]) {
         skip_first.call_once(|| separator = true);
 
         println!("Platform: {}", platform.name);
-        println!(
-            "  Build Artifacts: {}",
-            platform.folders.iter().map(ToString::to_string).collect::<Vec<_>>().join(SEPARATOR),
-        );
-        println!(
-            "  Matched On: {}",
-            platform.associated.iter().map(ToString::to_string).collect::<Vec<_>>().join(SEPARATOR),
-        );
+        println!("  Build Artifacts: {}", list_output(&platform.folders));
+        println!("  Matched On: {}", list_output(&platform.associated));
     }
 }

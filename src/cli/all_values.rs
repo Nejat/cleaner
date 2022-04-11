@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
-use crate::utils::SEPARATOR;
+use crate::utils::list_output;
 
 /// Generic comma delimited multiple string values or "all" argument
 #[derive(Debug, Eq, PartialEq, Subcommand)]
@@ -59,7 +59,7 @@ impl Display for AllValues {
             Self::All =>
                 fmt.write_str("all"),
             Self::Values { values } =>
-                fmt.write_str(&values.join(SEPARATOR))
+                fmt.write_str(&list_output(values))
         }
     }
 }

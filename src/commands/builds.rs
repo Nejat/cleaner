@@ -82,7 +82,9 @@ fn build_artifacts_handler<F>(
     }
 
     if found == 0 {
-        // todo: add an & for the last listed platform, if more than one platform
-        println!("No build artifacts found for {}{} platform{}", filter.for_select("the ", ""), filter, filter.pluralize("s"));
+        println!(
+            "No build artifacts found for {}{} platform{}",
+            filter.for_select("the ", ""), filter, filter.pluralize("s")
+        );
     }
 }
