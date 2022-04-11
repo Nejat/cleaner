@@ -18,6 +18,23 @@ pub enum AllValues {
 }
 
 impl AllValues {
+    /// Helper method for selecting between two value based on variant
+    #[allow(dead_code)] // i likes me some symmetries
+    pub const fn for_all<'a, T: ?Sized>(&'a self, value: &'a T, other: &'a T) -> &'a T {
+        match self {
+            Self::All => value,
+            Self::Values { .. } => other,
+        }
+    }
+
+    /// Helper method for selecting between two value based on variant
+    pub const fn for_select<'a, T: ?Sized>(&'a self, value: &'a T, other: &'a T) -> &'a T {
+        match self {
+            Self::All => other,
+            Self::Values { .. } => value,
+        }
+    }
+
     /// Checks to see if value is included
     pub fn matches(&self, checked: &str) -> bool {
         match self {
