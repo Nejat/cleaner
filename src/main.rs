@@ -7,6 +7,7 @@
 #![deny(missing_docs)]
 // ==============================================================
 #![allow(clippy::module_name_repetitions)]
+#![allow(clippy::items_after_statements)]
 // ==============================================================
 #![doc(html_root_url = "https://docs.rs/cleaner/0.2.0")]
 
@@ -23,6 +24,7 @@ use commands::builds::remove_build_artifacts;
 use crate::cli::all_values::AllValues;
 use crate::cli::CLI;
 use crate::cli::commands::Commands;
+use crate::commands::empties::{list_empties, remove_empties};
 use crate::commands::supported::supported_platforms;
 use crate::models::Platform;
 
@@ -76,6 +78,15 @@ fn main() {
                     list_build_artifacts(&builds.path, &builds.types, &PLATFORMS),
                 Some(Action::Remove) =>
                     remove_build_artifacts(&builds.path, &builds.types, &PLATFORMS, builds.confirmed)
+            }
+        }
+        Commands::Empties(empties) => {
+            match empties.action {
+                None |
+                Some(Action::List) =>
+                    list_empties(&empties.path, empties.hidden),
+                Some(Action::Remove) =>
+                    remove_empties(&empties.path, empties.confirmed, empties.hidden)
             }
         }
         Commands::Supported => supported_platforms(&PLATFORMS)

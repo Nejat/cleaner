@@ -1,9 +1,8 @@
-use crate::cli::all_values::AllValues;
 use crate::cli::commands::actions::Action;
 
-/// Builds subcommand for handling build artifacts for supported platforms
+/// Empties subcommand for handling empty folders
 #[derive(Debug, Eq, PartialEq, Args)]
-pub struct Builds {
+pub struct Empties {
     /// Optionally specify action, defaults to "list"
     #[clap(subcommand)]
     pub action: Option<Action>,
@@ -16,10 +15,7 @@ pub struct Builds {
     #[clap(short, long, verbatim_doc_comment, default_value = ".")]
     pub path: String,
 
-    /// Optionally specify supported development platform(s), defaults to "all"
-    ///
-    /// * use "supported" command to see a list of all supported
-    /// development platforms
-    #[clap(short, long, verbatim_doc_comment, default_value_t = AllValues::All)]
-    pub types: AllValues,
+    /// Includes empty hidden folders, i.e. folders that start with a '.'
+    #[clap(short = 's', long, verbatim_doc_comment)]
+    pub hidden: bool,
 }

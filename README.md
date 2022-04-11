@@ -37,6 +37,7 @@ OPTIONS:
 
 SUBCOMMANDS:
     builds       Manage build artifacts of supported platforms
+    empties      Manage empty folders
     help         Print this message or the help of the given subcommand(s)
     supported    List supported development platforms
 ```
@@ -59,36 +60,59 @@ OPTIONS:
 
     -p, --path <PATH>
             Optionally specify target path, defaults to current folder
-            
+
             [default: .]
 
     -t, --types <TYPES>
             Optionally specify supported development platform(s), defaults to "all"
-            
+
             * use "supported" command to see a list of all supported
             development platforms
-            
+
             [default: all]
 
     -V, --version
             Print version information
 
     -y, --confirmed
-            Executes remove action automatically confirmed, i.e. non-interactively,
-            defaults to interactive
+            Executes remove action non-interactively,, defaults to interactive
 
 SUBCOMMANDS:
     help
             Print this message or the help of the given subcommand(s)
     list
-            List corresponding folders, default subcommand
+            List matching folders, default subcommand
     remove
-            Remove corresponding folders
+            Remove matching folders
+```
+
+
+### Empties
+
+```
+> cleaner empties
+cleaner-empties 0.2.0
+Manage empty folders
+
+USAGE:
+    cleaner empties [OPTIONS] [SUBCOMMAND]
+
+OPTIONS:
+    -h, --help           Print help information
+    -p, --path <PATH>    Optionally specify target path, defaults to current folder [default: .]
+    -s, --hidden         Includes empty hidden folders, i.e. folders that start with a '.'
+    -V, --version        Print version information
+    -y, --confirmed      Executes remove action non-interactively,, defaults to interactive
+
+SUBCOMMANDS:
+    help      Print this message or the help of the given subcommand(s)
+    list      List matching folders, default subcommand
+    remove    Remove matching folders
 ```
 
 ### Supported
 
-```shell
+```
 > cleaner supported
 ```
 
