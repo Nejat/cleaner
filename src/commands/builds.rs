@@ -3,7 +3,7 @@ use std::process::exit;
 use std::sync::Once;
 
 use crate::{AllValues, Platform};
-use crate::commands::walker::BuildsWalker;
+use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
 use crate::utils::{validate_path, validate_platforms_filter};
 use crate::utils::question::{DefaultAnswer, Response, yes_no_question};

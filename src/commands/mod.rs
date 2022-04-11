@@ -1,3 +1,3 @@
 pub mod builds;
 pub mod supported;
-pub mod walker;
+pub mod walkers;

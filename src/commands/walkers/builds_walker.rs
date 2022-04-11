@@ -57,7 +57,7 @@ impl<'a> BuildsWalker<'a> {
         }
     }
 
-    /// Determines if entry is matches a supported platform with build artifacts
+    /// Determines if entry matches a supported platform with build artifacts
     fn build_artifacts(&self, entry: &DirEntry) -> Option<BuildArtifacts<'a>> {
         if entry.file_type().is_dir() {
             let folder = entry.file_name().to_string_lossy().to_lowercase();
