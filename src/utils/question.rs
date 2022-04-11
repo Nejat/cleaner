@@ -1,11 +1,14 @@
+use std::error::Error;
 use std::fmt::{Display, Formatter};
 use std::io::{Read, stdin, stdout, Write};
 use std::process::exit;
 
 use once_cell::sync::Lazy;
 
-/// Matches new line input
-static NEW_LINE: Lazy<u8> = Lazy::new(|| u8::try_from('\n').unwrap());
+/// Matches carriage return input
+static CARRIAGE_RETURN: Lazy<u8> = Lazy::new(|| u8::try_from('\r').unwrap());
+/// Matches line feed input
+static LINE_FEED: Lazy<u8> = Lazy::new(|| u8::try_from('\n').unwrap());
 /// Matches 'y' input
 static YES: Lazy<u8> = Lazy::new(|| u8::try_from('y').unwrap());
 /// Matches 'n' input
@@ -58,22 +61,30 @@ pub fn yes_no_question(prompt: &str, default_answer: DefaultAnswer) -> Response 
 
     let mut character = [0];
 
-    match stdin().read(&mut character) {
+    return match stdin().read(&mut character) {
         Ok(_) => {
+            if character[0] == *CARRIAGE_RETURN {
+                if let Err(err) = stdin().read(&mut character) {
+                    stdin_err(err)
+                }
+            }
+
             match character[0].to_ascii_lowercase() {
                 input if input == *YES => Response::Yes { defaulted: false },
                 input if input == *NO => Response::No { defaulted: false },
                 input =>
                     match default_answer {
-                        DefaultAnswer::Yes => Response::Yes { defaulted: input == *NEW_LINE },
-                        DefaultAnswer::No => Response::No { defaulted: input == *NEW_LINE }
+                        DefaultAnswer::Yes => Response::Yes { defaulted: input == *LINE_FEED },
+                        DefaultAnswer::No => Response::No { defaulted: input == *LINE_FEED }
                     }
             }
         }
-        Err(err) => {
-            eprintln!("Exception reading user input: {}", err);
-            eprintln!();
-            exit(-1);
-        }
+        Err(err) => stdin_err(err)
+    };
+
+    fn stdin_err<E: Error>(err: E) -> ! {
+        eprintln!("Exception reading user input: {}", err);
+        eprintln!();
+        exit(-1);
     }
 }
