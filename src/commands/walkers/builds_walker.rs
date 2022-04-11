@@ -33,6 +33,8 @@ impl<'a> Iterator for BuildsWalker<'a> {
                     let artifacts = self.build_artifacts(&entry);
 
                     if artifacts.is_some() {
+                        self.walker.skip_current_dir();
+
                         return artifacts;
                     }
                 }
