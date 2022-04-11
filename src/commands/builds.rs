@@ -1,4 +1,5 @@
 use std::fs::remove_dir_all;
+use std::path::MAIN_SEPARATOR;
 use std::process::exit;
 use std::sync::Once;
 
@@ -64,7 +65,8 @@ fn build_artifacts_handler<F>(
     let notify_once = Once::new();
 
     for entry in BuildsWalker::new(filter, path, platforms) {
-        let output = format!("{:max$} > {}", entry.name, &entry.folder[path.len() + 1..], max = max_width);
+        let offset = if path.ends_with(MAIN_SEPARATOR) { 0 } else { 1 };
+        let output = format!("{:max$} > {}", entry.name, &entry.folder[path.len() + offset..], max = max_width);
 
         notify_once.call_once(|| println!("Found\n"));
 
