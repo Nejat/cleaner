@@ -15,7 +15,7 @@ pub struct BuildsWalker<'a> {
     pub path: &'a str,
 
     /// All supported platforms
-    pub platforms: &'a [Platform<'a>],
+    pub platforms: &'a [Platform],
 
     /// WalkDir iterator
     pub walker: IntoIter,
@@ -66,7 +66,7 @@ impl<'a> BuildsWalker<'a> {
             let parent = entry.path().parent().unwrap().to_string_lossy().to_lowercase();
 
             for platform in self.platforms.iter()
-                .filter(|p| self.filter.matches(p.name) && p.folders.contains(&folder.as_str()))
+                .filter(|p| self.filter.matches(&p.name) && p.folders.contains(&folder))
             {
                 if parent.contains(folder.as_str()) {
                     break;
@@ -82,14 +82,14 @@ impl<'a> BuildsWalker<'a> {
                             };
 
                             // todo: support wildcards instead
-                            platform.associated.contains(&file_name.as_str()) ||
-                                platform.associated.contains(&ext.as_str())
+                            platform.associated.contains(&file_name) ||
+                                platform.associated.contains(&ext)
                         } else {
                             false
                         }
                     ).count() > 0 {
                         return Some(BuildArtifacts {
-                            name: platform.name,
+                            name: &platform.name,
                             folder: entry.path().to_string_lossy().to_string(),
                         });
                     }

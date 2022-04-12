@@ -1,17 +1,18 @@
 /// Describes a supported development platform
-pub struct Platform<'a> {
+#[derive(Serialize, Deserialize)]
+pub struct Platform {
     /// Development platform name
-    pub name: &'a str,
+    pub name: String,
 
     /// Expected build artifact folder names of platform
-    pub folders: Vec<&'a str>,
+    pub folders: Vec<String>,
 
     /// Associated files and file extensions that mark the platform
-    pub associated: Vec<&'a str>,
+    pub associated: Vec<String>,
 }
 
-impl<'a> AsRef<str> for Platform<'a> {
+impl AsRef<str> for Platform {
     fn as_ref(&self) -> &str {
-        self.name
+        &self.name
     }
 }

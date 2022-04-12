@@ -13,6 +13,8 @@
 
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate serde;
 
 use clap::Parser;
 use once_cell::sync::Lazy;
@@ -27,6 +29,7 @@ use crate::cli::commands::Commands;
 use crate::commands::empties::{list_empties, remove_empties};
 use crate::commands::supported::supported_platforms;
 use crate::models::Platform;
+use crate::utils::load_supported_platforms;
 
 //#[doc(hidden)]
 mod cli;
@@ -42,26 +45,7 @@ mod tests;
 
 /// Definition of supported development platforms
 //#[doc(hidden)]
-static PLATFORMS: Lazy<Vec<Platform>> = Lazy::new(|| {
-    // todo: make this configurable by loading from a json definition file
-    vec![
-        Platform {
-            name: ".Net",
-            folders: vec!["bin", "obj"],
-            associated: vec!["sln", "csproj"],
-        },
-        Platform {
-            name: "Rust",
-            folders: vec!["target"],
-            associated: vec!["cargo.toml"],
-        },
-        Platform {
-            name: "Web",
-            folders: vec!["node_modules"],
-            associated: vec!["package.json"],
-        },
-    ]
-});
+static PLATFORMS: Lazy<Vec<Platform>> = Lazy::new(load_supported_platforms);
 
 /// Cleaner command line parsing and command execution
 //#[doc(hidden)]
