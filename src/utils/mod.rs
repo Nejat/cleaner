@@ -1,9 +1,11 @@
 use std::{env, fs};
-use std::fs::File;
+use std::fs::{File, remove_file};
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::process::exit;
 use std::sync::Once;
+
+use inquire::Confirm;
 
 use crate::{AllValues, Platform};
 
@@ -23,26 +25,50 @@ pub fn load_supported_platforms() -> Vec<Platform> {
 
     path.set_file_name(SUPPORTED_PLATFORMS_PATH);
 
-    if !path.exists() {
-        if let Err(err) = fs::write(&path, include_str!("../../supported-platforms.json")) {
-            display_error_and_exit(&format!("Exception creating configuration file: {err}"));
+    let mut retry = false;
+
+    loop {
+        if retry && path.exists() {
+            if let Err(err) = remove_file(&path) {
+                display_error_and_exit(&format!("Exception resetting configuration: {err}"));
+            }
         }
-    }
 
-    let file = match File::open(&path) {
-        Ok(file) => file,
-        Err(err) => {
-            display_error_and_exit(&format!("Exception accessing configuration file: {err}"));
+        if !path.exists() {
+            if let Err(err) = fs::write(&path, include_str!("../../supported-platforms.json")) {
+                display_error_and_exit(&format!("Exception creating configuration file: {err}"));
+            }
         }
-    };
 
-    let reader = BufReader::new(file);
+        let file = match File::open(&path) {
+            Ok(file) => file,
+            Err(err) => {
+                display_error_and_exit(&format!("Exception accessing configuration file: {err}"));
+            }
+        };
 
-    match serde_json::from_reader(reader) {
-        Ok(platforms) => platforms,
-        Err(err) => {
-            // todo: give user option to overwrite corrupt configuration with default configuration
-            display_error_and_exit(&format!("Exception with configuration: {err}"));
+        let reader = BufReader::new(file);
+        let exception_message = |err| format!("Exception with configuration: {err}");
+
+        match serde_json::from_reader(reader) {
+            Ok(platforms) => return platforms,
+            Err(err) if retry =>
+                display_error_and_exit(&exception_message(err)),
+            Err(err) => {
+                let message = exception_message(err);
+
+                eprintln!("{}\n", message);
+
+                let confirmation = Confirm::new("Would you like to reset it, prior changes will be lost")
+                    .with_default(false)
+                    .with_placeholder("N")
+                    .prompt();
+
+                match confirmation {
+                    Ok(true) => retry = true,
+                    _ => display_error_and_exit(&message)
+                }
+            }
         }
     }
 }
