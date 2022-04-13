@@ -124,7 +124,7 @@ Lists all supported development platforms
 
 Platform: .Net
   Build Artifacts: bin & obj
-  Matched On: sln & csproj
+  Matched On: *.sln & *.csproj
 
 Platform: Rust
   Build Artifacts: target
@@ -140,6 +140,11 @@ _\* this version has a static list of supported development platforms, see [road
 
 ## Road Map
 
-* [x] _configuration to support custom list of development platforms_
+* [x] list projects with build artifacts
+* [x] remove build artifacts from projects
+* [x] list empty folders
+* [x] remove empty folders
+* [x] configuration to support custom list of development platforms
+* [x] wild card support for matching files used to determine platform type 
 * [ ] _new commands to manage configuration list_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_

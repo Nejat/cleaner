@@ -14,7 +14,7 @@ pub struct BuildsWalker<'a> {
     /// Path to recursively walk
     pub path: &'a str,
 
-    /// All supported platforms
+    /// All supported platform filter
     pub platforms: &'a [Platform],
 
     /// WalkDir iterator
@@ -75,14 +75,8 @@ impl<'a> BuildsWalker<'a> {
                     if files.filter(
                         |v| if let Ok(file) = v {
                             let file_name = file.file_name().to_string_lossy().to_lowercase();
-                            let ext = match file.path().extension() {
-                                None => String::default(),
-                                Some(ext) => ext.to_string_lossy().to_lowercase()
-                            };
 
-                            // todo: support wildcards instead
-                            platform.associated.contains(&file_name) ||
-                                platform.associated.contains(&ext)
+                            platform.associated.iter().any(|f| f.matches(&file_name))
                         } else {
                             false
                         }
