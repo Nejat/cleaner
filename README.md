@@ -29,7 +29,7 @@ cleaner 0.5.0
 Cleaner is a utility for cleaning up build artifacts in bulk
 
 USAGE:
-    cleaner <SUBCOMMAND>
+    cleaner.exe <SUBCOMMAND>
 
 OPTIONS:
     -h, --help       Print help information
@@ -39,7 +39,7 @@ SUBCOMMANDS:
     builds       Manage build artifacts of supported platforms
     empties      Manage empty folders
     help         Print this message or the help of the given subcommand(s)
-    supported    List supported development platforms
+    supported    Manage supported development platforms
 ```
 
 ## Commands
@@ -119,7 +119,22 @@ SUBCOMMANDS:
 Lists all configured development platforms
 
 ```
-> cleaner supported
+cleaner-supported 0.5.0
+Manage supported development platforms
+
+USAGE:
+    cleaner.exe supported [SUBCOMMAND]
+
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
+
+SUBCOMMANDS:
+    help      Print this message or the help of the given subcommand(s)
+    list      List configured development platforms
+    manage    Manage platform configuration
+    path      Show path of platform configuration file
+    reset     Reset platform configuration to default
 ```
 
 ## Supported Platforms
@@ -151,6 +166,7 @@ _* deleting or resetting configuration will re-create this list_
 * [x] remove empty folders
 * [x] configuration to support custom list of development platforms
 * [x] wild card support for matching files used to determine platform type 
-* [ ] _path command to show path of supported configuration json_
-* [ ] _new commands to manage configuration list_
+* [x] _path command to show path of supported configuration json_
+* [x] _reset command to revert supported configuration json to default_
+* [ ] _new command to manage configuration list_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_

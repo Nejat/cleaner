@@ -12,19 +12,9 @@ use crate::{AllValues, Platform};
 /// Separator for creating a list for string values for display
 const SEPARATOR: &str = ", ";
 
-/// loads a configuration of supported platforms
+/// Loads a configuration of supported platforms
 pub fn load_supported_platforms() -> Vec<Platform> {
-    const SUPPORTED_PLATFORMS_PATH: &str = "supported-platforms.json";
-
-    let mut path = match env::current_exe() {
-        Ok(path) => path,
-        Err(err) => {
-            display_error_and_exit(&format!("Exception determining path information: {err}"));
-        }
-    };
-
-    path.set_file_name(SUPPORTED_PLATFORMS_PATH);
-
+    let path = path_of_supported_platforms_configuration();
     let mut retry = false;
 
     loop {
@@ -73,7 +63,7 @@ pub fn load_supported_platforms() -> Vec<Platform> {
     }
 }
 
-/// creates an easier to read comma separated output from a list
+/// Creates an easier to read comma separated output from a list
 pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
     let mut output = String::default();
     let mut add_separator = false;
@@ -97,6 +87,22 @@ pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
 
 
     output
+}
+
+/// Gets the path of the supported platforms configuration json file
+pub fn path_of_supported_platforms_configuration() -> PathBuf {
+    const SUPPORTED_PLATFORMS_PATH: &str = "supported-platforms.json";
+
+    let mut path = match env::current_exe() {
+        Ok(path) => path,
+        Err(err) => {
+            display_error_and_exit(&format!("Exception determining path information: {err}"));
+        }
+    };
+
+    path.set_file_name(SUPPORTED_PLATFORMS_PATH);
+
+    path
 }
 
 /// Validates a given path exists and it is a folder

@@ -1,12 +1,12 @@
 use crate::cli::all_values::AllValues;
-use crate::cli::commands::actions::Action;
+use crate::cli::commands::actions::CommonAction;
 
 /// Builds subcommand for handling build artifacts for supported platforms
 #[derive(Debug, Eq, PartialEq, Args)]
 pub struct Builds {
     /// Optionally specify action, defaults to "list"
     #[clap(subcommand)]
-    pub action: Option<Action>,
+    pub action: Option<CommonAction>,
 
     /// Executes remove action non-interactively,, defaults to interactive
     #[clap(short = 'y', long, verbatim_doc_comment)]

@@ -1,11 +1,11 @@
-use crate::cli::commands::actions::Action;
+use crate::cli::commands::actions::CommonAction;
 
 /// Empties subcommand for handling empty folders
 #[derive(Debug, Eq, PartialEq, Args)]
 pub struct Empties {
     /// Optionally specify action, defaults to "list"
     #[clap(subcommand)]
-    pub action: Option<Action>,
+    pub action: Option<CommonAction>,
 
     /// Executes remove action non-interactively,, defaults to interactive
     #[clap(short = 'y', long, verbatim_doc_comment)]
