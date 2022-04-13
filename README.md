@@ -140,6 +140,6 @@ _\* this version has a static list of supported development platforms, see [road
 
 ## Road Map
 
-* [ ] _configuration to support custom list of development platforms_
+* [x] _configuration to support custom list of development platforms_
 * [ ] _new commands to manage configuration list_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_
