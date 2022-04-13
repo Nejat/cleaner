@@ -136,8 +136,6 @@ Platform: Web
 
 ```
 
-_\* this version has a static list of supported development platforms, see [road map](#road-map) for upcoming features_
-
 ## Road Map
 
 * [x] list projects with build artifacts
