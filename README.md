@@ -46,6 +46,8 @@ SUBCOMMANDS:
 
 ### Builds
 
+Manages build artifacts of configured platforms
+
 ```
 > cleaner builds
 cleaner-builds 0.5.0
@@ -89,6 +91,8 @@ SUBCOMMANDS:
 
 ### Empties
 
+Manages empty folders, skips hidden folder by default
+
 ```
 > cleaner empties
 cleaner-empties 0.5.0
@@ -112,13 +116,15 @@ SUBCOMMANDS:
 
 ### Supported
 
+Lists all configured development platforms
+
 ```
 > cleaner supported
 ```
 
-Lists all supported development platforms
-
 ## Supported Platforms
+
+Initial/Default list of supported platforms
 
 ```
 
@@ -135,6 +141,7 @@ Platform: Web
   Matched On: package.json
 
 ```
+_* deleting or resetting configuration will re-create this list_
 
 ## Road Map
 
@@ -144,5 +151,6 @@ Platform: Web
 * [x] remove empty folders
 * [x] configuration to support custom list of development platforms
 * [x] wild card support for matching files used to determine platform type 
+* [ ] _path command to show path of supported configuration json_
 * [ ] _new commands to manage configuration list_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_
