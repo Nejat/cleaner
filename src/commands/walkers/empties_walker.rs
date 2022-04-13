@@ -1,7 +1,8 @@
 use std::path::PathBuf;
-use std::process::exit;
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
+
+use crate::utils::display_error_and_exit;
 
 /// Recursively walks the folders in a path looking for empties
 pub struct EmptiesWalker<'a> {
@@ -55,10 +56,9 @@ impl<'a> Iterator for EmptiesWalker<'a> {
                     }
                 }
                 Err(err) => {
-                    eprint!("Exception while searching \"{}\" for empties: {err}", self.path);
-                    eprintln!();
-
-                    exit(-1);
+                    display_error_and_exit(
+                        &format!("Exception while searching \"{}\" for empties: {err}", self.path)
+                    );
                 }
             }
         }
@@ -82,10 +82,9 @@ impl<'a> EmptiesWalker<'a> {
             |e| match e {
                 Ok(e) => e.file_type().is_file(),
                 Err(err) => {
-                    eprint!("Exception while searching \"{}\" for empties: {err}", self.path);
-                    eprintln!();
-
-                    exit(-1);
+                    display_error_and_exit(
+                        &format!("Exception while searching \"{}\" for empties: {err}", self.path)
+                    );
                 }
             }
         ) {

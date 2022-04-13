@@ -1,13 +1,12 @@
 use std::fs::remove_dir_all;
 use std::path::MAIN_SEPARATOR;
-use std::process::exit;
 
 use inquire::Confirm;
 
 use crate::{AllValues, Platform};
 use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
-use crate::utils::{validate_path, validate_platforms_filter};
+use crate::utils::{display_error_and_exit, validate_path, validate_platforms_filter};
 
 /// Lists matching build artifacts
 pub fn list_build_artifacts(path: &str, filter: &AllValues, platforms: &[Platform]) {
@@ -39,9 +38,7 @@ pub fn remove_build_artifacts(
                 match confirmation {
                     Ok(answer) => do_it = answer,
                     Err(err) => {
-                        eprintln!("Exception processing input: {}", err);
-                        eprintln!();
-                        exit(-1);
+                        display_error_and_exit(&format!("Exception processing input: {err}"));
                     }
                 }
             };
@@ -73,9 +70,9 @@ fn build_artifacts_handler<F>(
         let output = format!("[{:max$}] {}", entry.name, &entry.folder[path.len() + offset..], max = max_width);
 
         if let Err(err) = handler(&entry, &output) {
-            eprintln!("\nException occurred while {action}ing {output}:\n  {err}");
-            println!();
-            exit(-1);
+            display_error_and_exit(
+                &format!("\nException occurred while {action}ing {output}:\n  {err}")
+            );
         }
 
         found += 1;

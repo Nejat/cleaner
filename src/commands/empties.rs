@@ -1,11 +1,10 @@
 use std::fs::remove_dir_all;
 use std::path::{MAIN_SEPARATOR, PathBuf};
-use std::process::exit;
 
 use inquire::Confirm;
 
 use crate::commands::walkers::EmptiesWalker;
-use crate::utils::validate_path;
+use crate::utils::{display_error_and_exit, validate_path};
 
 /// Lists empty folders
 pub fn list_empties(path: &str, show_hidden: bool) {
@@ -37,9 +36,7 @@ pub fn remove_empties(
                 match confirmation {
                     Ok(answer) => do_it = answer,
                     Err(err) => {
-                        eprintln!("Exception processing input: {}", err);
-                        eprintln!();
-                        exit(-1);
+                        display_error_and_exit(&format!("Exception processing input: {err}"));
                     }
                 }
             };
@@ -70,9 +67,9 @@ fn empties_handler<F>(
         let output = entry.to_string_lossy()[path.len() + offset..].to_string();
 
         if let Err(err) = handler(&entry, &output) {
-            eprintln!("\nException occurred while {action}ing {output}:\n  {err}");
-            println!();
-            exit(-1);
+            display_error_and_exit(
+                &format!("\nException occurred while {action}ing {output}:\n  {err}")
+            );
         }
 
         found += 1;

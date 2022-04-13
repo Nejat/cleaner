@@ -1,10 +1,10 @@
 use std::fs::read_dir;
-use std::process::exit;
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
 use crate::{AllValues, Platform};
 use crate::models::BuildArtifacts;
+use crate::utils::display_error_and_exit;
 
 /// Recursively walks the folders in a path looking for build artifacts
 pub struct BuildsWalker<'a> {
@@ -39,10 +39,9 @@ impl<'a> Iterator for BuildsWalker<'a> {
                     }
                 }
                 Err(err) => {
-                    eprint!("Exception while searching \"{}\" for build artifacts: {err}", self.path);
-                    eprintln!();
-
-                    exit(-1);
+                    display_error_and_exit(
+                        &format!("Exception while searching \"{}\" for build artifacts: {err}", self.path)
+                    );
                 }
             }
         }

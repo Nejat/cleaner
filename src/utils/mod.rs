@@ -17,9 +17,7 @@ pub fn load_supported_platforms() -> Vec<Platform> {
     let mut path = match env::current_exe() {
         Ok(path) => path,
         Err(err) => {
-            eprintln!("Exception determining path information: {}", err);
-            eprintln!();
-            exit(-1);
+            display_error_and_exit(&format!("Exception determining path information: {err}"));
         }
     };
 
@@ -27,18 +25,14 @@ pub fn load_supported_platforms() -> Vec<Platform> {
 
     if !path.exists() {
         if let Err(err) = fs::write(&path, include_str!("../../supported-platforms.json")) {
-            eprintln!("Exception creating configuration file: {}", err);
-            eprintln!();
-            exit(-1);
+            display_error_and_exit(&format!("Exception creating configuration file: {err}"));
         }
     }
 
     let file = match File::open(&path) {
         Ok(file) => file,
         Err(err) => {
-            eprintln!("Exception accessing configuration file: {}", err);
-            eprintln!();
-            exit(-1);
+            display_error_and_exit(&format!("Exception accessing configuration file: {err}"));
         }
     };
 
@@ -48,9 +42,7 @@ pub fn load_supported_platforms() -> Vec<Platform> {
         Ok(platforms) => platforms,
         Err(err) => {
             // todo: give user option to overwrite corrupt configuration with default configuration
-            eprintln!("Exception with configuration: {}", err);
-            eprintln!();
-            exit(-1);
+            display_error_and_exit(&format!("Exception with configuration: {err}"));
         }
     }
 }
@@ -86,15 +78,15 @@ pub fn validate_path(path: &str) {
     let path = PathBuf::from(path);
 
     if !path.exists() {
-        eprintln!("path: \"{}\" - does not exist!\n", path.to_string_lossy());
-        println!();
-        exit(-1);
+        display_error_and_exit(
+            &format!("path: \"{}\" - does not exist!\n", path.to_string_lossy())
+        );
     }
 
     if path.is_file() {
-        eprintln!("path: \"{}\" - is not directory!\n", path.to_string_lossy());
-        println!();
-        exit(-1);
+        display_error_and_exit(
+            &format!("path: \"{}\" - is not directory!\n", path.to_string_lossy())
+        );
     }
 }
 
@@ -107,12 +99,18 @@ pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
         if !unsupported.is_empty() {
             let pluralized = if unsupported.len() > 1 { "s" } else { "" };
 
-            eprintln!("Unsupported platform{}: {}", pluralized, list_output(&unsupported));
-            eprintln!();
-            eprintln!("Supported Platforms: {}", list_output(platforms));
-            eprintln!();
-
-            exit(-1);
+            display_error_and_exit(&format!(
+                "Unsupported platform{}: {}\nSupported Platforms: {}",
+                pluralized, list_output(&unsupported), list_output(platforms)
+            ));
         }
     }
+}
+
+#[inline]
+pub fn display_error_and_exit(message: &str) -> ! {
+    eprintln!("{}", message);
+    eprintln!();
+
+    exit(-1);
 }
