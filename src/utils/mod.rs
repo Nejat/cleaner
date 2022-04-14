@@ -1,4 +1,5 @@
 use std::{env, fs};
+use std::collections::HashSet;
 use std::fs::{File, remove_file};
 use std::io::BufReader;
 use std::path::PathBuf;
@@ -7,7 +8,7 @@ use std::sync::Once;
 
 use inquire::Confirm;
 
-use crate::{AllValues, Platform};
+use crate::{AllValues, Platform, supported_platforms};
 
 /// Separator for creating a list for string values for display
 const SEPARATOR: &str = ", ";
@@ -40,8 +41,13 @@ pub fn load_supported_platforms() -> Vec<Platform> {
         let reader = BufReader::new(file);
         let exception_message = |err| format!("Exception with configuration: {err}");
 
-        match serde_json::from_reader(reader) {
-            Ok(platforms) => return platforms,
+        let platforms: serde_json::Result<Vec<Platform>> = serde_json::from_reader(reader);
+
+        match platforms {
+            Ok(platforms) => {
+                validate_platforms(&platforms);
+                return platforms;
+            }
             Err(err) if retry =>
                 display_error_and_exit(&exception_message(err)),
             Err(err) => {
@@ -122,7 +128,26 @@ pub fn validate_path(path: &str) {
     }
 }
 
-/// Validates al platform filters are supported platforms, case sensitive
+/// Validates all platforms
+pub fn validate_platforms(platforms: &[Platform]) {
+    let has_platforms_with_spaces = platforms.iter().any(|p| p.name.contains(' '));
+
+    if has_platforms_with_spaces {
+        supported_platforms(platforms);
+        println!();
+        display_error_and_exit("Platform names can not contain spaces");
+    }
+
+    let unique_names = platforms.iter().map(|p| p.name.to_lowercase()).collect::<HashSet<_>>();
+
+    if unique_names.len() != platforms.len() {
+        supported_platforms(platforms);
+        println!();
+        display_error_and_exit("Platform names are case insensitive; must be unique");
+    }
+}
+
+/// Validates all platform filters are supported platforms, case sensitive
 pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
     if let AllValues::Values { values } = filter {
         let unsupported = values.iter()

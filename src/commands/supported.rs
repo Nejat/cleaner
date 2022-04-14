@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use std::fs::remove_file;
 use std::sync::Once;
 
@@ -42,14 +43,34 @@ pub fn reset_configuration() {
 pub fn supported_platforms(platforms: &[Platform]) {
     let mut separator = false;
     let skip_first = Once::new();
+    let dupes = platforms.iter().fold(
+        HashMap::new(),
+        |mut acc, next| {
+            let entry = acc.entry(next.name.to_lowercase()).or_insert(0);
 
+            *entry += 1;
+
+            acc
+        }
+    )
+        .into_iter()
+        .filter_map(|(key, count)| { if count > 1 { Some(key) } else { None } })
+        .collect::<HashSet<_>>();
+
+    let status = |name: &str| if dupes.contains(&name.to_lowercase()) {
+        " <<= duplicate platform name"
+    } else if name.contains(' ') {
+        " <<= name contains space(s)"
+    } else {
+        ""
+    };
 
     for platform in platforms {
         if separator { println!(); }
 
         skip_first.call_once(|| separator = true);
 
-        println!("Platform: {}", platform.name);
+        println!("Platform: {}{}", platform.name, status(&platform.name));
         println!("  Build Artifacts: {}", list_output(&platform.folders));
         println!("  Matched On: {}", list_output(&platform.associated));
     }
