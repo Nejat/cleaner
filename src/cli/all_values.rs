@@ -39,7 +39,7 @@ impl AllValues {
     pub fn matches(&self, checked: &str) -> bool {
         match self {
             Self::All => true,
-            Self::Values { values } => values.iter().any(|v| v == checked)
+            Self::Values { values } => values.iter().any(|v| v.eq_ignore_ascii_case(checked))
         }
     }
 

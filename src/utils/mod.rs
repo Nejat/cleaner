@@ -126,7 +126,7 @@ pub fn validate_path(path: &str) {
 pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
     if let AllValues::Values { values } = filter {
         let unsupported = values.iter()
-            .filter(|v| platforms.iter().all(|p| &p.name != *v)).collect::<Vec<_>>();
+            .filter(|v| platforms.iter().all(|p| p.name.eq_ignore_ascii_case(v))).collect::<Vec<_>>();
 
         if !unsupported.is_empty() {
             let pluralized = if unsupported.len() > 1 { "s" } else { "" };
