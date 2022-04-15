@@ -72,6 +72,11 @@ pub fn load_supported_platforms() -> Vec<Platform> {
 /// Creates an easier to read comma separated output from a list
 pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
     let mut output = String::default();
+
+    if source.is_empty() {
+        return output;
+    }
+
     let mut add_separator = false;
     let skip_first = Once::new();
 
@@ -131,20 +136,21 @@ pub fn validate_path(path: &str) {
 /// Validates all platforms
 pub fn validate_platforms(platforms: &[Platform]) {
     let has_platforms_with_spaces = platforms.iter().any(|p| p.name.contains(' '));
+    let unique_names = platforms.iter()
+        .map(|p| p.name.to_lowercase())
+        .collect::<HashSet<_>>()
+        .len() != platforms.len();
 
-    if has_platforms_with_spaces {
-        supported_platforms(platforms);
-        println!();
-        display_error_and_exit("Platform names can not contain spaces");
-    }
+    let message = match (unique_names, has_platforms_with_spaces) {
+        (true, false) => "Platform names must be unique",
+        (false, true) => "Platform names can not contain spaces",
+        (true, true) => "Platform names can not contain spaces and must be unique",
+        _ => return
+    };
 
-    let unique_names = platforms.iter().map(|p| p.name.to_lowercase()).collect::<HashSet<_>>();
-
-    if unique_names.len() != platforms.len() {
-        supported_platforms(platforms);
-        println!();
-        display_error_and_exit("Platform names are case insensitive; must be unique");
-    }
+    supported_platforms(platforms);
+    println!();
+    display_error_and_exit(message);
 }
 
 /// Validates all platform filters are supported platforms, case sensitive
@@ -166,7 +172,7 @@ pub fn validate_platforms_filter(filter: &AllValues, platforms: &[Platform]) {
 
 #[inline]
 pub fn display_error_and_exit(message: &str) -> ! {
-    eprintln!("{}", message);
+    eprintln!("\n{}", message);
     eprintln!();
 
     exit(-1);

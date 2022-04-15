@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::fmt::Formatter;
 
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -5,7 +6,7 @@ use serde::de::{Error, Visitor};
 use wildmatch::WildMatch;
 
 /// Describes a supported development platform
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Platform {
     /// Development platform name
     pub name: String,
@@ -17,17 +18,56 @@ pub struct Platform {
     pub associated: Vec<Filter>,
 }
 
+impl Platform {
+    /// Checks if two supported platforms produce the same affect
+    pub fn same_as(&self, other: &Self) -> bool {
+        self.folders.len() == other.folders.len() &&
+        self.associated.len() == other.associated.len() &&
+        self.folders.iter()
+            .all(|f| other.folders.iter().any(|f2| f.trim().eq_ignore_ascii_case(f2.trim()))) &&
+        self.associated.iter()
+            .all(|f| other.associated.iter().any(|f2| f.1.trim().eq_ignore_ascii_case(f2.1.trim())))
+    }
+}
+
 impl AsRef<str> for Platform {
     fn as_ref(&self) -> &str {
         &self.name
     }
 }
 
+impl Eq for Platform {}
+
+impl PartialEq<Self> for Platform {
+    fn eq(&self, other: &Self) -> bool {
+        self.name.to_lowercase() == other.name.to_lowercase()
+    }
+}
+
+impl Ord for Platform {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.name.cmp(&other.name)
+    }
+}
+
+impl PartialOrd for Platform {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.name.partial_cmp(&other.name)
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct Filter(WildMatch, String);
 
 impl Filter {
-    pub fn matches(&self, value: &str) -> bool {
-        self.0.matches(value)
+    /// Initializes a new `Filter`
+    pub fn new(filter: String) -> Self {
+        Self(WildMatch::new(&filter), filter)
+    }
+
+    /// Validates a `Filter` matches a checked value
+    pub fn matches(&self, value: impl AsRef<str>) -> bool {
+        self.0.matches(value.as_ref())
     }
 }
 
@@ -65,6 +105,6 @@ impl<'de> Deserialize<'de> for Filter {
     {
         let value = deserializer.deserialize_str(StringVisitor)?;
 
-        Ok(Self(WildMatch::new(&value), value))
+        Ok(Self::new(value))
     }
 }

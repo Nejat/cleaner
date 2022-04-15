@@ -198,7 +198,7 @@ OPTIONS:
 
 ### Supported
 
-Lists all configured development platforms
+Supported development platforms configuration
 
 ```
 cleaner-supported 0.8.0
@@ -219,7 +219,7 @@ SUBCOMMANDS:
     reset     Reset platform configuration to default
 ```
 
-## Supported Platforms
+#### Supported List
 
 Initial/Default list of supported platforms
 
@@ -251,5 +251,6 @@ _* deleting or resetting configuration will re-create this list_
 * [x] _path command to show path of supported configuration json_
 * [x] _reset command to revert supported configuration json to default_
 * [x] _list supported platforms_
-* [ ] _new command to manage configuration list_
+* [x] _command to manage configuration list_
+* [ ] _better handling of input cancelling_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_
