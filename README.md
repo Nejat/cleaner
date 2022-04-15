@@ -25,7 +25,7 @@ _\* requires rust and cargo - [Rust Install Instructions](https://rustup.rs/)_
 ## Usage
 
 ```
-cleaner 0.7.0
+cleaner 0.8.0
 Cleaner is a utility for cleaning up build artifacts in bulk
 
 USAGE:
@@ -50,7 +50,7 @@ Manages build artifacts of configured platforms
 
 ```
 > cleaner builds
-cleaner-builds 0.7.0
+cleaner-builds 0.8.0
 Manage build artifacts of supported platforms
 
 USAGE:
@@ -71,7 +71,7 @@ SUBCOMMANDS:
 List matching build artifacts
 
 ```
-cleaner-builds-list 0.7.0
+cleaner-builds-list 0.8.0
 List matching build artifacts
 
 USAGE:
@@ -103,7 +103,7 @@ OPTIONS:
 Remove matching build artifacts
 
 ```
-cleaner-builds-remove 0.7.0
+cleaner-builds-remove 0.8.0
 Remove matching build artifacts
 
 USAGE:
@@ -138,7 +138,7 @@ OPTIONS:
 Manages empty folders, skips hidden folder by default
 
 ```
-cleaner-empties 0.7.0
+cleaner-empties 0.8.0
 Manage empty folders
 
 USAGE:
@@ -159,7 +159,7 @@ SUBCOMMANDS:
 List matching empty folders
 
 ```
-cleaner-empties-list 0.7.0
+cleaner-empties-list 0.8.0
 List matching empty folders
 
 USAGE:
@@ -179,7 +179,7 @@ OPTIONS:
 Remove matching empty folders
 
 ```
-cleaner-empties-remove 0.7.0
+cleaner-empties-remove 0.8.0
 Remove matching empty folders
 
 USAGE:
@@ -201,7 +201,7 @@ OPTIONS:
 Lists all configured development platforms
 
 ```
-cleaner-supported 0.7.0
+cleaner-supported 0.8.0
 Manage supported development platforms
 
 USAGE:
