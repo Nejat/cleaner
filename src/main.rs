@@ -9,7 +9,7 @@
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::items_after_statements)]
 // ==============================================================
-#![doc(html_root_url = "https://docs.rs/cleaner/0.8.0")]
+#![doc(html_root_url = "https://docs.rs/cleaner/0.9.0")]
 
 #[macro_use]
 extern crate clap;
