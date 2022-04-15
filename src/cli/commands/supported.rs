@@ -1,9 +1,17 @@
-use crate::cli::commands::actions::SupportedAction;
+/// Supported subcommand for managing supported platforms
+#[derive(Debug, Eq, PartialEq, Subcommand)]
+pub enum Supported {
+    /// List configured development platforms
+    #[clap(alias = "ls")]
+    List,
 
-/// Builds subcommand for handling build artifacts for supported platforms
-#[derive(Debug, Eq, PartialEq, Args)]
-pub struct Supported {
-    /// Optionally specify action, defaults to "list"
-    #[clap(subcommand)]
-    pub action: Option<SupportedAction>,
+    /// Show path of platform configuration file
+    #[clap(alias = "show")]
+    Path,
+
+    /// Manage platform configuration
+    Manage,
+
+    /// Reset platform configuration to default
+    Reset,
 }

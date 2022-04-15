@@ -29,7 +29,7 @@ cleaner 0.7.0
 Cleaner is a utility for cleaning up build artifacts in bulk
 
 USAGE:
-    cleaner.exe <SUBCOMMAND>
+    cleaner <SUBCOMMAND>
 
 OPTIONS:
     -h, --help       Print help information
@@ -54,64 +54,146 @@ cleaner-builds 0.7.0
 Manage build artifacts of supported platforms
 
 USAGE:
-    cleaner builds [OPTIONS] [SUBCOMMAND]
+    cleaner builds <SUBCOMMAND>
+
+OPTIONS:
+    -h, --help       Print help information
+    -V, --version    Print version information
+
+SUBCOMMANDS:
+    help      Print this message or the help of the given subcommand(s)
+    list      List matching build artifacts
+    remove    Remove matching build artifacts
+```
+
+#### Builds List
+
+List matching build artifacts
+
+```
+cleaner-builds-list 0.7.0
+List matching build artifacts
+
+USAGE:
+    cleaner builds list [OPTIONS] [PATH]
+
+ARGS:
+    <PATH>
+            Optionally specify target path, defaults to current folder
+            
+            [default: .]
 
 OPTIONS:
     -h, --help
             Print help information
 
-    -p, --path <PATH>
-            Optionally specify target path, defaults to current folder
+    -t, --types <TYPES>
+            Optionally specify supported development platform(s), defaults to "all"
+            
+            * use "supported" command to see a list of all supported development platforms
+            
+            [default: all]
 
+    -V, --version
+            Print version information
+```
+
+#### Builds Remove
+
+Remove matching build artifacts
+
+```
+cleaner-builds-remove 0.7.0
+Remove matching build artifacts
+
+USAGE:
+    cleaner builds remove [OPTIONS] [PATH]
+
+ARGS:
+    <PATH>
+            Optionally specify target path, defaults to current folder
+            
             [default: .]
+
+OPTIONS:
+    -h, --help
+            Print help information
 
     -t, --types <TYPES>
             Optionally specify supported development platform(s), defaults to "all"
-
-            * use "supported" command to see a list of all supported
-            development platforms
-
+            
+            * use "supported" command to see a list of all supported development platforms
+            
             [default: all]
 
     -V, --version
             Print version information
 
     -y, --confirmed
-            Executes remove action non-interactively,, defaults to interactive
-
-SUBCOMMANDS:
-    help
-            Print this message or the help of the given subcommand(s)
-    list
-            List matching folders, default subcommand
-    remove
-            Remove matching folders
+            Executes remove action without confirmation, defaults to interactive confirmation
 ```
-
 
 ### Empties
 
 Manages empty folders, skips hidden folder by default
 
 ```
-> cleaner empties
 cleaner-empties 0.7.0
 Manage empty folders
 
 USAGE:
-    cleaner empties [OPTIONS] [SUBCOMMAND]
+    cleaner empties <SUBCOMMAND>
 
 OPTIONS:
-    -h, --help           Print help information
-    -p, --path <PATH>    Optionally specify target path, defaults to current folder [default: .]
-    -s, --hidden         Includes empty hidden folders, i.e. folders that start with a '.'
-    -V, --version        Print version information
-    -y, --confirmed      Executes remove action non-interactively,, defaults to interactive
+    -h, --help       Print help information
+    -V, --version    Print version information
 
 SUBCOMMANDS:
     help      Print this message or the help of the given subcommand(s)
-    list      List matching folders, default subcommand
-    remove    Remove matching folders
+    list      List matching empty folders
+    remove    Remove matching empty folders
+```
+
+#### Empties List
+
+List matching empty folders
+
+```
+cleaner-empties-list 0.7.0
+List matching empty folders
+
+USAGE:
+    cleaner empties list [OPTIONS] [PATH]
+
+ARGS:
+    <PATH>    Optionally specify target path, defaults to current folder [default: .]
+
+OPTIONS:
+    -h, --help       Print help information
+    -s, --hidden     Includes empty hidden folders, i.e. folders that start with a '.'
+    -V, --version    Print version information
+```
+
+#### Empties Remove
+
+Remove matching empty folders
+
+```
+cleaner-empties-remove 0.7.0
+Remove matching empty folders
+
+USAGE:
+    cleaner empties remove [OPTIONS] [PATH]
+
+ARGS:
+    <PATH>    Optionally specify target path, defaults to current folder [default: .]
+
+OPTIONS:
+    -h, --help         Print help information
+    -s, --hidden       Includes empty hidden folders, i.e. folders that start with a '.'
+    -V, --version      Print version information
+    -y, --confirmed    Executes remove action without confirmation, defaults to interactive
+                       confirmation
 ```
 
 ### Supported
@@ -168,5 +250,6 @@ _* deleting or resetting configuration will re-create this list_
 * [x] wild card support for matching files used to determine platform type 
 * [x] _path command to show path of supported configuration json_
 * [x] _reset command to revert supported configuration json to default_
+* [x] _list supported platforms_
 * [ ] _new command to manage configuration list_
 * [ ] _will consider new logic for detecting build artifacts on a case by case bases, will consider pull requests_
