@@ -69,8 +69,8 @@ fn main() {
             show_configuration(),
         Commands::Supported(Supported::Manage) =>
             manage_configuration(),
-        Commands::Supported(Supported::Reset) =>
-            reset_configuration(),
+        Commands::Supported(Supported::Reset { confirmed }) =>
+            reset_configuration(*confirmed),
     }
 
     println!();

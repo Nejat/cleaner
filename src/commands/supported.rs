@@ -13,7 +13,17 @@ pub fn manage_configuration() {
 }
 
 /// Deletes platform configuration file to reset configuration to default
-pub fn reset_configuration() {
+pub fn reset_configuration(confirmed: bool) {
+    if !path_of_supported_platforms_configuration().exists() {
+        println!("Configuration of supported platforms is reset");
+        return;
+    }
+
+    if confirmed {
+        reset_configuration_json();
+        return;
+    }
+
     println!("By resetting your configuration you will loose any customization you have applied\n");
 
     let confirmation = Confirm::new("Are you sure")
@@ -23,15 +33,8 @@ pub fn reset_configuration() {
 
     match confirmation {
         Ok(true) => {
-            let path = path_of_supported_platforms_configuration();
-
-            if path.exists() {
-                match remove_file(&path) {
-                    Ok(_) => {}
-                    Err(err) =>
-                        display_error_and_exit(&format!("Exception resenting configuration: {err}"))
-                }
-            }
+            println!();
+            reset_configuration_json();
         }
         Ok(false) => {}
         Err(err) =>
@@ -51,7 +54,7 @@ pub fn supported_platforms(platforms: &[Platform]) {
             *entry += 1;
 
             acc
-        }
+        },
     )
         .into_iter()
         .filter_map(|(key, count)| { if count > 1 { Some(key) } else { None } })
@@ -79,4 +82,17 @@ pub fn supported_platforms(platforms: &[Platform]) {
 /// Shows the path of the configuration json file
 pub fn show_configuration() {
     println!("{}", path_of_supported_platforms_configuration().to_string_lossy());
+}
+
+/// Deletes supported platforms configuration file
+fn reset_configuration_json() {
+    let path = path_of_supported_platforms_configuration();
+
+    if path.exists() {
+        match remove_file(&path) {
+            Ok(_) => println!("Configuration of supported platforms has been reset"),
+            Err(err) =>
+                display_error_and_exit(&format!("Exception resenting configuration: {err}"))
+        }
+    }
 }
