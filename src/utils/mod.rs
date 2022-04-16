@@ -133,24 +133,77 @@ pub fn validate_path(path: &str) {
     }
 }
 
+/// Validates a single platform
+pub fn validate_platform(platform: &Platform) -> bool {
+    !platform.name.contains(' ') && !platform.folders.is_empty()
+}
+
 /// Validates all platforms
 pub fn validate_platforms(platforms: &[Platform]) {
     let has_platforms_with_spaces = platforms.iter().any(|p| p.name.contains(' '));
-    let unique_names = platforms.iter()
+    let not_unique_names = platforms.iter()
         .map(|p| p.name.to_lowercase())
         .collect::<HashSet<_>>()
         .len() != platforms.len();
 
-    let message = match (unique_names, has_platforms_with_spaces) {
-        (true, false) => "Platform names must be unique",
-        (false, true) => "Platform names can not contain spaces",
-        (true, true) => "Platform names can not contain spaces and must be unique",
-        _ => return
-    };
+    let mut message = String::default();
 
-    supported_platforms(platforms);
-    println!();
-    display_error_and_exit(message);
+    if not_unique_names || has_platforms_with_spaces {
+        message.push_str("* Platform names ");
+
+        if has_platforms_with_spaces {
+            message.push_str("can not contain spaces");
+        }
+
+        if not_unique_names {
+            if message.ends_with('s') {
+                message.push_str(" and ");
+            }
+
+            message.push_str("must be unique");
+        }
+    }
+
+    let no_builds = platforms.iter().any(|p| p.folders.is_empty());
+    let builds_not_unique = platforms.iter().any(|p| !validate_unique_values(&p.folders));
+
+    if no_builds || builds_not_unique {
+        if !message.is_empty() { message.push('\n'); }
+
+        message.push_str("* Platform build artifacts ");
+
+        if no_builds {
+            message.push_str("require at lease one value");
+        }
+
+        if builds_not_unique {
+            if no_builds {
+                message.push_str(" and ");
+            }
+            message.push_str("must be unique");
+        }
+    }
+
+    let associated_not_unique = platforms.iter().any(|p| !validate_unique_values(&p.associated));
+
+    if associated_not_unique {
+        if !message.is_empty() { message.push('\n'); }
+
+        message.push_str("* Platform associated files and folders must be unique");
+    }
+
+    if !message.is_empty() {
+        let configuration_path = path_of_supported_platforms_configuration();
+        let configuration_path = configuration_path.to_string_lossy();
+
+        message.push_str(&format!("\n\nConfigurations file requires manually fix: {}", configuration_path));
+    }
+
+    if !message.is_empty() {
+        supported_platforms(platforms);
+        println!();
+        display_error_and_exit(&message);
+    }
 }
 
 /// Validates all platform filters are supported platforms, case sensitive
@@ -176,4 +229,11 @@ pub fn display_error_and_exit(message: &str) -> ! {
     eprintln!();
 
     exit(-1);
+}
+
+#[inline]
+pub fn validate_unique_values<V>(values: &[V]) -> bool
+    where V: AsRef<str>
+{
+    values.iter().map(|v| v.as_ref().to_lowercase()).collect::<HashSet<_>>().len() == values.len()
 }

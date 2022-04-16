@@ -8,7 +8,7 @@ use inquire::validator::StringValidator;
 
 use crate::{Platform, PLATFORMS};
 use crate::models::Filter;
-use crate::utils::{display_error_and_exit, list_output, path_of_supported_platforms_configuration};
+use crate::utils::{display_error_and_exit, list_output, path_of_supported_platforms_configuration, validate_platform, validate_unique_values};
 
 /// Manage supported platforms configuration
 pub fn manage_configuration() {
@@ -86,7 +86,7 @@ pub fn supported_platforms(platforms: &[Platform]) {
         .filter_map(|(key, count)| { if count > 1 { Some(key) } else { None } })
         .collect::<HashSet<_>>();
 
-    let status = |name: &str| if dupes.contains(&name.to_lowercase()) {
+    let check_name = |name: &str| if dupes.contains(&name.to_lowercase()) {
         " <<= duplicate platform name"
     } else if name.contains(' ') {
         " <<= name contains space(s)"
@@ -94,12 +94,26 @@ pub fn supported_platforms(platforms: &[Platform]) {
         ""
     };
 
+    let check_builds = |builds: &[String]| if builds.is_empty() {
+        " <<= requires a build artifact"
+    } else if validate_unique_values(builds) {
+        ""
+    } else {
+        " <<= build artifacts need to be unique"
+    };
+
+    let check_associated = |associated: &[String]| if validate_unique_values(associated) {
+        ""
+    } else {
+        " <<= associated files & folders need to be unique"
+    };
+
     for platform in platforms {
         if separator { println!(); }
 
         skip_first.call_once(|| separator = true);
 
-        display_platform(platform, status);
+        display_platform(platform, check_name, check_builds, check_associated);
     }
 }
 
@@ -123,7 +137,7 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
     }
 
     let associated = get_a_collection_of_input(
-        "Add file or folder name that identifies platform", &[], false, true
+        "Add file or folder name that identifies platform", &[], false, true,
     )
         .into_iter()
         .map(Filter::new)
@@ -133,14 +147,14 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
 
     if let Some(equivalent) = platforms.iter().find(|p| p.same_as(&platform)) {
         println!("\n{:?} handles the same build artifacts\n", equivalent.name);
-        display_platform(equivalent, |_| "");
+        display_platform(equivalent, no_check, no_check, no_check);
         println!();
 
         return false;
     }
 
     println!();
-    display_platform(&platform, |_| "");
+    display_platform(&platform, no_check, no_check, no_check);
     println!();
 
     platforms.push(platform);
@@ -155,7 +169,7 @@ fn get_platform_name(platforms: &[Platform], initial_value: &str) -> Option<Stri
     let name = Text::new("Platform name:")
         .with_validator(&validate_not_blank)
         .with_validator(&validate_no_spaces)
-        .with_validator(&validate_not_in_list(platforms, "platform"))
+        .with_validator(&validate_unique(platforms, "platform"))
         .with_initial_value(initial_value)
         .prompt();
 
@@ -201,12 +215,19 @@ fn delete_platforms(platforms: &mut Vec<Platform>) -> bool {
 }
 
 /// Displays a platform to the user
-fn display_platform<F>(platform: &Platform, status: F)
-    where F: Fn(&str) -> &'static str
+fn display_platform<'a, N, B, A>(
+    platform: &'a Platform,
+    name_check: N,
+    build_check: B,
+    associate_check: A
+)
+    where N: Fn(&'a str) -> &'static str,
+          B: Fn(&'a [String]) -> &'static str,
+          A: Fn(&'a [String]) -> &'static str
 {
-    println!("Platform:          {}{}", platform.name, status(&platform.name));
-    println!("  Build Artifacts: {}", list_output(&platform.folders));
-    println!("  Matched On:      {}", list_output(&platform.associated));
+    println!("Platform:          {}{}", platform.name, name_check(&platform.name));
+    println!("  Build Artifacts: {}{}", list_output(&platform.folders), build_check(&platform.folders));
+    println!("  Matched On:      {}{}", list_output(&platform.associated), associate_check(&platform.folders));
 }
 
 /// Lets user select entries in a collection and deletes them
@@ -227,7 +248,7 @@ fn get_a_collection_of_input(
     prompt: &str,
     validators: &[StringValidator],
     required: bool,
-    unique: bool
+    unique: bool,
 ) -> Vec<String> {
     const AT_LEAST_ONE: &str = "Requires at least one value";
     const BLANK_TO_END: &str = "Leave blank to end";
@@ -243,7 +264,7 @@ fn get_a_collection_of_input(
 
         let value = if unique {
             let new_values = collection.iter().map(|(_k, v)| v.clone()).collect::<Vec<_>>();
-            let unique_validator = &validate_not_in_list(&new_values, "");
+            let unique_validator = &validate_unique(&new_values, "");
 
             input.with_validator(unique_validator).prompt()
         } else {
@@ -256,7 +277,7 @@ fn get_a_collection_of_input(
                 let input = input.trim();
 
                 collection.entry(input.to_lowercase()).or_insert_with(|| input.to_string());
-            },
+            }
             Err(_) => break
         }
 
@@ -316,8 +337,8 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             ADD_ARTIFACT => {
                 let artifacts = get_a_collection_of_input(
                     "Add new artifacts",
-                    &[&validate_not_in_list(&modified_platform.folders, "artifacts")],
-                    false, true
+                    &[&validate_unique(&modified_platform.folders, "artifacts")],
+                    false, true,
                 );
 
                 for artifact in artifacts {
@@ -329,8 +350,8 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             ADD_ASSOCIATED => {
                 let associated = get_a_collection_of_input(
                     "Add new associated",
-                    &[&validate_not_in_list(&modified_platform.associated, "associated")],
-                    false, true
+                    &[&validate_unique(&modified_platform.associated, "associated")],
+                    false, true,
                 );
 
                 for item in associated {
@@ -339,7 +360,9 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             }
             REMOVE_ASSOCIATED =>
                 delete_selected_entries(&mut modified_platform.associated, "associated"),
-            ACCEPT => break,
+            ACCEPT => if validate_platform(&modified_platform) {
+                break;
+            } else {},
             CANCEL => return false,
             _ => unreachable!()
         }
@@ -351,7 +374,10 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
     if modified {
         *original_platform = modified_platform;
-        display_platform(original_platform, |_| "");
+
+        println!();
+        display_platform(original_platform, no_check, no_check, no_check);
+        println!();
     }
 
     modified
@@ -379,6 +405,9 @@ fn make_selections<S>(message: &str, choices: &[S]) -> Option<Vec<String>>
         Err(_) => None
     }
 }
+// constant functions cannot evaluate destructors
+#[allow(clippy::missing_const_for_fn)]
+fn no_check<F>(_: F) -> &'static str { "" }
 
 /// Deletes supported platforms configuration file
 fn reset_configuration_json() {
@@ -433,21 +462,12 @@ fn validate_not_blank(value: &str) -> Result<(), String> {
 }
 
 /// Validates a value is unique in a collection of values
-fn validate_not_in_list<'a, V>(checked: &'a [V], what: &'a str) -> impl Fn(&str) -> Result<(), String> + 'a
+fn validate_unique<'a, V>(checked: &'a [V], what: &'a str) -> impl Fn(&str) -> Result<(), String> + 'a
     where V: AsRef<str>
 {
     move |value: &str| if checked.iter().any(|v| v.as_ref().eq_ignore_ascii_case(value)) {
-        Err(String::from(&format!("{value:?} already exists, {what} names must be unique")))
+        Err(String::from(&format!("{value:?} already exists, {what} values must be unique")))
     } else {
         Ok(())
     }
 }
-
-// /// Validates a name is unique in a collection of supported platforms
-// fn validate_platform_name_is_unique(platforms: &[Platform]) -> impl Fn(&str) -> Result<(), String> + '_ {
-//     |value: &str| if platforms.iter().any(|p| p.name.eq_ignore_ascii_case(value)) {
-//         Err(String::from(&format!("{value:?} already exists, platform names must be unique")))
-//     } else {
-//         Ok(())
-//     }
-// }
