@@ -3,13 +3,13 @@ use std::path::MAIN_SEPARATOR;
 
 use inquire::Confirm;
 
-use crate::{AllValues, Platform};
+use crate::{Platform, Selection};
 use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
 use crate::utils::{display_error_and_exit, validate_path, validate_platforms_filter};
 
 /// Lists matching build artifacts
-pub fn list_build_artifacts(path: &str, filter: &AllValues, platforms: &[Platform]) {
+pub fn list_build_artifacts(path: &str, filter: &Selection, platforms: &[Platform]) {
     build_artifacts_handler(
         "list", path, filter, platforms,
         |_, msg| {
@@ -22,7 +22,7 @@ pub fn list_build_artifacts(path: &str, filter: &AllValues, platforms: &[Platfor
 
 /// Removes matching build artifacts
 pub fn remove_build_artifacts(
-    path: &str, filter: &AllValues, platforms: &[Platform], confirmed: bool,
+    path: &str, filter: &Selection, platforms: &[Platform], confirmed: bool,
 ) {
     build_artifacts_handler(
         "remove", path, filter, platforms,
@@ -55,7 +55,7 @@ pub fn remove_build_artifacts(
 
 /// Common build artifact handling logic
 fn build_artifacts_handler<F>(
-    action: &str, path: &str, filter: &AllValues, platforms: &[Platform], handler: F,
+    action: &str, path: &str, filter: &Selection, platforms: &[Platform], handler: F,
 )
     where F: Fn(&BuildArtifacts, &str) -> Result<(), String>
 {
@@ -81,7 +81,7 @@ fn build_artifacts_handler<F>(
     if found == 0 {
         println!(
             "No build artifacts found for {}{} platform{}",
-            filter.for_select("the ", ""), filter, filter.pluralize("s")
+            filter.choose("the ", ""), filter, filter.pluralize("s")
         );
     }
 }

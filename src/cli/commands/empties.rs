@@ -26,5 +26,5 @@ pub enum Empties {
         /// Includes empty hidden folders, i.e. folders that start with a '.'
         #[clap(short = 's', long, verbatim_doc_comment)]
         hidden: bool,
-    }
+    },
 }

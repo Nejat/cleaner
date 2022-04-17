@@ -3,7 +3,7 @@
 use crate::cli::commands::Commands;
 
 pub mod commands;
-pub mod all_values;
+pub mod selection;
 
 /// Utility for cleaning build artifacts in bulk
 ///

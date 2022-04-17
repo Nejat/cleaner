@@ -219,7 +219,7 @@ fn display_platform<'a, N, B, A>(
     platform: &'a Platform,
     name_check: N,
     build_check: B,
-    associate_check: A
+    associate_check: A,
 )
     where N: Fn(&'a str) -> &'static str,
           B: Fn(&'a [String]) -> &'static str,
@@ -405,6 +405,7 @@ fn make_selections<S>(message: &str, choices: &[S]) -> Option<Vec<String>>
         Err(_) => None
     }
 }
+
 // constant functions cannot evaluate destructors
 #[allow(clippy::missing_const_for_fn)]
 fn no_check<F>(_: F) -> &'static str { "" }

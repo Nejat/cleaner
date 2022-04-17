@@ -5,33 +5,24 @@ use crate::utils::list_output;
 
 /// Generic comma delimited multiple string values or "all" argument
 #[derive(Debug, Eq, PartialEq, Subcommand)]
-pub enum AllValues {
+pub enum Selection {
     /// Indicates "all" should be included
     #[clap(verbatim_doc_comment)]
     All,
 
     /// Defines only specific values
     #[clap(verbatim_doc_comment)]
-    Values {
+    Select {
         values: Vec<String>
     },
 }
 
-impl AllValues {
-    /// Helper method for selecting between two value based on variant
-    #[allow(dead_code)] // i likes me some symmetries
-    pub const fn for_all<'a, T: ?Sized>(&'a self, value: &'a T, other: &'a T) -> &'a T {
+impl Selection {
+    /// Helper method for selecting between two values based on variant value
+    pub const fn choose<'a, T: ?Sized>(&'a self, select: &'a T, all: &'a T) -> &'a T {
         match self {
-            Self::All => value,
-            Self::Values { .. } => other,
-        }
-    }
-
-    /// Helper method for selecting between two value based on variant
-    pub const fn for_select<'a, T: ?Sized>(&'a self, value: &'a T, other: &'a T) -> &'a T {
-        match self {
-            Self::All => other,
-            Self::Values { .. } => value,
+            Self::All => all,
+            Self::Select { .. } => select,
         }
     }
 
@@ -39,7 +30,7 @@ impl AllValues {
     pub fn matches(&self, checked: &str) -> bool {
         match self {
             Self::All => true,
-            Self::Values { values } => values.iter().any(|v| v.eq_ignore_ascii_case(checked))
+            Self::Select { values } => values.iter().any(|v| v.eq_ignore_ascii_case(checked))
         }
     }
 
@@ -47,31 +38,31 @@ impl AllValues {
     pub fn pluralize<'a>(&'a self, plural: &'a str) -> &'a str {
         match self {
             Self::All => plural,
-            Self::Values { values } if values.len() > 1 => plural,
-            Self::Values { .. } => "",
+            Self::Select { values } if values.len() > 1 => plural,
+            Self::Select { .. } => "",
         }
     }
 }
 
-impl Display for AllValues {
+impl Display for Selection {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::All =>
                 fmt.write_str("all"),
-            Self::Values { values } =>
+            Self::Select { values } =>
                 fmt.write_str(&list_output(values))
         }
     }
 }
 
-impl FromStr for AllValues {
+impl FromStr for Selection {
     type Err = String;
 
     fn from_str(src: &str) -> Result<Self, Self::Err> {
         Ok(if src.trim().to_lowercase() == "all" {
             Self::All
         } else {
-            Self::Values {
+            Self::Select {
                 values: src.split(',').filter_map(
                     |v| if v.trim().is_empty() {
                         None

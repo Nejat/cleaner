@@ -2,14 +2,14 @@ use std::fs::read_dir;
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
-use crate::{AllValues, Platform};
+use crate::{Platform, Selection};
 use crate::models::BuildArtifacts;
 use crate::utils::display_error_and_exit;
 
 /// Recursively walks the folders in a path looking for build artifacts
 pub struct BuildsWalker<'a> {
     /// Filters supported platforms to include in iteration
-    pub filter: &'a AllValues,
+    pub filter: &'a Selection,
 
     /// Path to recursively walk
     pub path: &'a str,
@@ -49,7 +49,7 @@ impl<'a> Iterator for BuildsWalker<'a> {
 }
 
 impl<'a> BuildsWalker<'a> {
-    pub fn new(filter: &'a AllValues, path: &'a str, platforms: &'a [Platform]) -> Self {
+    pub fn new(filter: &'a Selection, path: &'a str, platforms: &'a [Platform]) -> Self {
         Self {
             filter,
             path,

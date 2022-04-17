@@ -13,6 +13,8 @@
 
 #[macro_use]
 extern crate clap;
+#[macro_use]
+extern crate serde;
 
 use clap::Parser;
 use once_cell::sync::Lazy;
@@ -20,12 +22,12 @@ use once_cell::sync::Lazy;
 use commands::builds::list_build_artifacts;
 use commands::builds::remove_build_artifacts;
 
-use crate::cli::all_values::AllValues;
 use crate::cli::CLI;
 use crate::cli::commands::builds::Builds;
 use crate::cli::commands::Commands;
 use crate::cli::commands::empties::Empties;
 use crate::cli::commands::supported::Supported;
+use crate::cli::selection::Selection;
 use crate::commands::empties::{list_empties, remove_empties};
 use crate::commands::supported::{manage_configuration, reset_configuration, show_configuration, supported_platforms};
 use crate::models::Platform;

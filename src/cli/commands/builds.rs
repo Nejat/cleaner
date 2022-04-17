@@ -1,4 +1,4 @@
-use crate::cli::all_values::AllValues;
+use crate::cli::selection::Selection;
 
 /// Builds subcommand for handling build artifacts for supported platforms
 #[derive(Debug, Eq, PartialEq, Subcommand)]
@@ -13,8 +13,8 @@ pub enum Builds {
         /// Optionally specify supported development platform(s), defaults to "all"
         ///
         /// * use "supported" command to see a list of all supported development platforms
-        #[clap(required = false, short, long, verbatim_doc_comment, default_value_t = AllValues::All)]
-        types: AllValues,
+        #[clap(required = false, short, long, verbatim_doc_comment, default_value_t = Selection::All)]
+        types: Selection,
     },
     /// Remove matching build artifacts
     #[clap(alias = "rm")]
@@ -26,20 +26,20 @@ pub enum Builds {
         /// Optionally specify supported development platform(s), defaults to "all"
         ///
         /// * use "supported" command to see a list of all supported development platforms
-        #[clap(short, long, verbatim_doc_comment, default_value_t = AllValues::All)]
-        types: AllValues,
+        #[clap(short, long, verbatim_doc_comment, default_value_t = Selection::All)]
+        types: Selection,
 
         /// Executes remove action without confirmation, defaults to interactive confirmation
         #[clap(short = 'y', long, verbatim_doc_comment)]
         confirmed: bool,
-    }
+    },
 }
 
 impl Default for Builds {
     fn default() -> Self {
         Self::List {
             path: String::from('.'),
-            types: AllValues::All
+            types: Selection::All,
         }
     }
 }
