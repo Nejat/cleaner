@@ -73,13 +73,11 @@ impl<'a> BuildsWalker<'a> {
 
                 if let Ok(files) = read_dir(&parent) {
                     if files.filter(
-                        |v| if let Ok(file) = v {
+                        |v| v.as_ref().map_or(false, |file| {
                             let file_name = file.file_name().to_string_lossy().to_lowercase();
 
                             platform.associated.iter().any(|f| f.matches(&file_name))
-                        } else {
-                            false
-                        }
+                        })
                     ).count() > 0 {
                         return Some(BuildArtifacts {
                             name: &platform.name,
@@ -88,9 +86,8 @@ impl<'a> BuildsWalker<'a> {
                     }
                 }
             }
-            None
-        } else {
-            None
         }
+
+        None
     }
 }

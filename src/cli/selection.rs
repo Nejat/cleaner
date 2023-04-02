@@ -4,7 +4,7 @@ use std::str::FromStr;
 use crate::utils::list_output;
 
 /// Generic comma delimited multiple string values or "all" argument
-#[derive(Debug, Eq, PartialEq, Subcommand)]
+#[derive(Clone, Debug, Eq, PartialEq, Subcommand)]
 pub enum Selection {
     /// Indicates "all" should be included
     #[clap(verbatim_doc_comment)]

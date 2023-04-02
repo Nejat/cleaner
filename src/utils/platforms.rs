@@ -49,7 +49,7 @@ pub fn load_supported_platforms() -> Vec<Platform> {
             Err(err) => {
                 let message = exception_message(err);
 
-                eprintln!("{}\n", message);
+                eprintln!("{message}\n");
 
                 let confirmation = Confirm::new("Would you like to reset it, prior changes will be lost")
                     .with_default(false)

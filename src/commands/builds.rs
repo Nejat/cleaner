@@ -66,8 +66,8 @@ fn build_artifacts_handler<F>(
     let mut found = 0;
 
     for entry in BuildsWalker::new(filter, path, platforms) {
-        let offset = if path.ends_with(MAIN_SEPARATOR) { 0 } else { 1 };
-        let output = format!("[{:max$}] {}", entry.name, &entry.folder[path.len() + offset..], max = max_width);
+        let offset = usize::from(!path.ends_with(MAIN_SEPARATOR));
+        let output = format!("[{:max_width$}] {}", entry.name, &entry.folder[path.len() + offset..]);
 
         if let Err(err) = handler(&entry, &output) {
             display_error_and_exit(
@@ -80,8 +80,8 @@ fn build_artifacts_handler<F>(
 
     if found == 0 {
         println!(
-            "No build artifacts found for {}{} platform{}",
-            filter.choose("the ", ""), filter, filter.pluralize("s")
+            "No build artifacts found for {filter}{} platform{}",
+            filter.choose("the ", ""), filter.pluralize("s")
         );
     }
 }

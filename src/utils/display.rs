@@ -36,7 +36,7 @@ pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
 
 #[inline]
 pub fn display_error_and_exit(message: &str) -> ! {
-    eprintln!("\n{}\n", message);
+    eprintln!("\n{message}\n");
 
     exit(-1);
 }

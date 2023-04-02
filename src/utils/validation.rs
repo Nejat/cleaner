@@ -84,7 +84,7 @@ pub fn validate_platforms(platforms: &[Platform]) {
         let configuration_path = utils::path_of_supported_platforms_configuration();
         let configuration_path = configuration_path.to_string_lossy();
 
-        message.push_str(&format!("\n\nConfigurations file requires manually fix: {}", configuration_path));
+        message.push_str(&format!("\n\nConfigurations file requires manual fix: {configuration_path}"));
     }
 
     if !message.is_empty() {

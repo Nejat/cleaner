@@ -166,17 +166,13 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
 
 /// Prompts user to select a platform configuration name
 fn get_platform_name(platforms: &[Platform], initial_value: &str) -> Option<String> {
-    let name = Text::new("Platform name:")
+    Text::new("Platform name:")
         .with_validator(&validate_not_blank)
         .with_validator(&validate_no_spaces)
         .with_validator(&validate_unique(platforms, "platform"))
         .with_initial_value(initial_value)
-        .prompt();
-
-    match name {
-        Ok(name) => Some(name),
-        Err(_) => None
-    }
+        .prompt()
+        .ok()
 }
 
 /// Confirms user action
@@ -263,7 +259,7 @@ fn get_a_collection_of_input(
             .with_validators(validators);
 
         let value = if unique {
-            let new_values = collection.iter().map(|(_k, v)| v.clone()).collect::<Vec<_>>();
+            let new_values = collection.values().cloned().collect::<Vec<_>>();
             let unique_validator = &validate_unique(&new_values, "");
 
             input.with_validator(unique_validator).prompt()
@@ -284,7 +280,7 @@ fn get_a_collection_of_input(
         end_message.call_once(|| message = AT_LEAST_ONE);
     }
 
-    collection.into_iter().map(|(_k, v)| v).collect()
+    collection.into_values().collect()
 }
 
 /// Lets user interactively modify an existing platform

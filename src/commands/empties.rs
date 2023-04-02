@@ -63,7 +63,7 @@ fn empties_handler<F>(
     let mut found = 0;
 
     for entry in EmptiesWalker::new(path, show_hidden) {
-        let offset = if path.ends_with(MAIN_SEPARATOR) { 0 } else { 1 };
+        let offset = usize::from(!path.ends_with(MAIN_SEPARATOR));
         let output = entry.to_string_lossy()[path.len() + offset..].to_string();
 
         if let Err(err) = handler(&entry, &output) {
@@ -75,5 +75,5 @@ fn empties_handler<F>(
         found += 1;
     }
 
-    if found == 0 { println!("No empties found at \"{}\"", path); }
+    if found == 0 { println!("No empties found at \"{path}\""); }
 }
