@@ -7,6 +7,8 @@ It recursively looks for specific build folders, at a given `path`, for the foll
 * Rust - `target`
 * .Net - `bin`, `obj` 
 * Web - `node_modules`
+* Angular - `.angular`,`.run`
+* Typescript/Deno - 'dist'
 
 ## Install
 

@@ -1,1 +1,49 @@
-[{"name":".Net","folders":["bin","obj"],"associated":["*.sln","*.csproj"]},{"name":"Rust","folders":["target"],"associated":["cargo.toml"]},{"name":"Web","folders":["node_modules"],"associated":["package.json"]}]
+[
+  {
+    "name": ".Net",
+    "folders": [
+      "bin",
+      "obj"
+    ],
+    "associated": [
+      "*.sln",
+      "*.csproj"
+    ]
+  },
+  {
+    "name": "Rust",
+    "folders": [
+      "target"
+    ],
+    "associated": [
+      "cargo.toml"
+    ]
+  },
+  {
+    "name": "Web",
+    "folders": [
+      "node_modules"
+    ],
+    "associated": [
+      "package.json"
+    ]
+  },
+  {
+    "name": "Angular",
+    "folders": [
+      ".angular", ".run"
+    ],
+    "associated": [
+      "angular.json"
+    ]
+  },
+  {
+    "name": "Typescript",
+    "folders": [
+      "dist"
+    ],
+    "associated": [
+      "tsconfig.json"
+    ]
+  }
+]
