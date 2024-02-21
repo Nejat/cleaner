@@ -5,14 +5,14 @@ use crate::Platform;
 fn given_two_same_platforms_both_should_be_the_same() {
     let web = Platform {
         name: String::from("Web"),
-        folders: vec![ String::from("node_modules") ],
-        associated: vec![ Filter::new(String::from("package.json")) ]
+        folders: vec![String::from("node_modules")],
+        associated: vec![Filter::new(String::from("package.json"))],
     };
 
     let nodejs = Platform {
         name: String::from("NodeJS"),
-        folders: vec![ String::from("node_modules") ],
-        associated: vec![ Filter::new(String::from("package.json")) ]
+        folders: vec![String::from("node_modules")],
+        associated: vec![Filter::new(String::from("package.json"))],
     };
 
     let the_same = web.same_as(&nodejs);
@@ -28,14 +28,14 @@ fn given_two_same_platforms_both_should_be_the_same() {
 fn given_two_different_platforms_neither_should_be_the_same() {
     let web = Platform {
         name: String::from("Web"),
-        folders: vec![ String::from("node_modules") ],
-        associated: vec![ Filter::new(String::from("package.json")) ]
+        folders: vec![String::from("node_modules")],
+        associated: vec![Filter::new(String::from("package.json"))],
     };
 
     let rust = Platform {
         name: String::from("Rust"),
-        folders: vec![ String::from("target") ],
-        associated: vec![ Filter::new(String::from("cargo.toml")) ]
+        folders: vec![String::from("target")],
+        associated: vec![Filter::new(String::from("cargo.toml"))],
     };
 
     let not_the_same = !web.same_as(&rust);

@@ -124,10 +124,7 @@ pub fn show_configuration() {
 
 /// Lets user interactively define and add a new platform to configuration
 fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
-    let name = match get_platform_name(platforms, "") {
-        Some(name) => name,
-        None => return false
-    };
+    let Some(name) = get_platform_name(platforms, "") else { return false; };
 
     let folders = get_a_collection_of_input("Add build artifact", &[], true, true);
 
@@ -189,10 +186,7 @@ fn confirmed(message: &str) -> bool {
 fn delete_platforms(platforms: &mut Vec<Platform>) -> bool {
     let choices = platforms.iter().map(|p| p.name.clone()).collect::<Vec<_>>();
 
-    let selected = match make_selections("platform(s) to delete", &choices) {
-        Some(selected) => selected,
-        None => return false,
-    };
+    let Some(selected) = make_selections("platform(s) to delete", &choices) else { return false; };
 
     let mut modified = false;
 
@@ -217,9 +211,9 @@ fn display_platform<'a, N, B, A>(
     build_check: B,
     associate_check: A,
 )
-    where N: Fn(&'a str) -> &'static str,
-          B: Fn(&'a [String]) -> &'static str,
-          A: Fn(&'a [String]) -> &'static str
+    where N: Fn(&'a str) -> &'static str + 'a,
+          B: Fn(&'a [String]) -> &'static str + 'a,
+          A: Fn(&'a [String]) -> &'static str + 'a
 {
     println!("Platform:          {}{}", platform.name, name_check(&platform.name));
     println!("  Build Artifacts: {}{}", list_output(&platform.folders), build_check(&platform.folders));
@@ -295,10 +289,7 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
     let choices = platforms.iter().map(|p| p.name.clone()).collect::<Vec<_>>();
 
-    let selected = match make_a_selection("a platform to modify:", &choices) {
-        Some(selected) => selected,
-        None => return false
-    };
+    let Some(selected) = make_a_selection("a platform to modify:", &choices) else { return false; };
 
     let platform_index = platforms.iter().position(|p| p.name == selected).unwrap();
     let original_platform = &platforms[platform_index];
@@ -320,10 +311,8 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
     loop {
         let choices = if modified { &modified_choices } else { &choices };
-        let choice = match make_a_selection("a modification:", choices) {
-            Some(selected) => selected,
-            None => return false
-        };
+
+        let Some(choice) = make_a_selection("a modification:", choices) else { return false; };
 
         match choice.as_str() {
             RENAME =>
@@ -356,10 +345,10 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             }
             REMOVE_ASSOCIATED =>
                 delete_selected_entries(&mut modified_platform.associated, "associated"),
-            ACCEPT => if validate_platform(&modified_platform) {
-                break;
-            } else {},
-            CANCEL => return false,
+            ACCEPT =>
+                if validate_platform(&modified_platform) { break; },
+            CANCEL =>
+                return false,
             _ => unreachable!()
         }
 
@@ -412,7 +401,7 @@ fn reset_configuration_json() {
 
     if path.exists() {
         match remove_file(&path) {
-            Ok(_) => println!("Configuration of supported platforms has been reset"),
+            Ok(()) => println!("Configuration of supported platforms has been reset"),
             Err(err) => display_error_and_exit(&format!("Exception resenting configuration: {err}"))
         }
     }
@@ -425,10 +414,7 @@ fn save_platforms(platforms: &[Platform]) -> bool {
         .truncate(true)
         .open(path_of_supported_platforms_configuration());
 
-    let file = match file {
-        Ok(file) => file,
-        Err(_) => return false
-    };
+    let Ok(file) = file else { return false; };
 
     let writer = BufWriter::new(file);
 

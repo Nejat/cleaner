@@ -16,14 +16,14 @@ pub struct Platform {
 }
 
 impl Platform {
-    /// Checks if two supported platforms produce the same affect
+    /// Checks if two supported platforms produce the same effect
     pub fn same_as(&self, other: &Self) -> bool {
         self.folders.len() == other.folders.len() &&
-        self.associated.len() == other.associated.len() &&
-        self.folders.iter()
-            .all(|f| other.folders.iter().any(|f2| f.trim().eq_ignore_ascii_case(f2.trim()))) &&
-        self.associated.iter()
-            .all(|f| other.associated.iter().any(|f2| f.as_ref().trim().eq_ignore_ascii_case(f2.as_ref().trim())))
+            self.associated.len() == other.associated.len() &&
+            self.folders.iter()
+                .all(|f| other.folders.iter().any(|f2| f.trim().eq_ignore_ascii_case(f2.trim()))) &&
+            self.associated.iter()
+                .all(|f| other.associated.iter().any(|f2| f.as_ref().trim().eq_ignore_ascii_case(f2.as_ref().trim())))
     }
 }
 
@@ -48,7 +48,5 @@ impl Ord for Platform {
 }
 
 impl PartialOrd for Platform {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.name.partial_cmp(&other.name)
-    }
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
 }

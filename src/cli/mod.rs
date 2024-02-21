@@ -8,7 +8,7 @@ pub mod selection;
 /// Utility for cleaning build artifacts in bulk
 ///
 /// Manage local build artifact folders for common dev platforms,
-/// including: Rust, .Net & Web
+/// including: Rust, dotNet & Web
 #[derive(Debug, Parser)]
 #[clap(version, about, long_about = None, verbatim_doc_comment)]
 #[clap(propagate_version = true)]

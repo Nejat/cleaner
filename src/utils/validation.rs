@@ -94,7 +94,7 @@ pub fn validate_platforms(platforms: &[Platform]) {
     }
 }
 
-/// Validates all platform filters are supported platforms, case sensitive
+/// Validates all platform filters are supported platforms, case-sensitive
 pub fn validate_platforms_filter(filter: &Selection, platforms: &[Platform]) {
     if let Selection::Select { values } = filter {
         let unsupported = values.iter()

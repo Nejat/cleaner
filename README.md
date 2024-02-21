@@ -5,7 +5,7 @@ Cleaner is a utility for cleaning up build artifacts in bulk.
 It recursively looks for specific build folders, at a given `path`, for the following project types:
 
 * Rust - `target`
-* .Net - `bin`, `obj` 
+* .Net - `bin`, `obj`
 * Web - `node_modules`
 * Angular - `.angular`,`.run`
 * Typescript/Deno - 'dist'
@@ -16,7 +16,7 @@ It recursively looks for specific build folders, at a given `path`, for the foll
 cargo install cleaner
 ```
 
- or
+or
 
 ```shell
 cargo install --git https://github.com/nejat/cleaner.git
@@ -240,6 +240,7 @@ Platform: Web
   Matched On: package.json
 
 ```
+
 _* deleting or resetting configuration will re-create this list_
 
 ## Road Map
@@ -249,7 +250,7 @@ _* deleting or resetting configuration will re-create this list_
 * [x] list empty folders
 * [x] remove empty folders
 * [x] configuration to support custom list of development platforms
-* [x] wild card support for matching files used to determine platform type 
+* [x] wild card support for matching files used to determine platform type
 * [x] _path command to show path of supported configuration json_
 * [x] _reset command to revert supported configuration json to default_
 * [x] _list supported platforms_
