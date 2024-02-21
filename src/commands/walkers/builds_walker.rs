@@ -1,4 +1,5 @@
 use std::fs::read_dir;
+use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
@@ -12,7 +13,7 @@ pub struct BuildsWalker<'a> {
     pub filter: &'a Selection,
 
     /// Path to recursively walk
-    pub path: &'a str,
+    pub path: PathBuf,
 
     /// All supported platform filter
     pub platforms: &'a [Platform],
@@ -40,7 +41,7 @@ impl<'a> Iterator for BuildsWalker<'a> {
                 }
                 Err(err) => {
                     display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for build artifacts: {err}", self.path)
+                        &format!("Exception while searching \"{}\" for build artifacts: {err}", self.path.to_string_lossy())
                     );
                 }
             }
@@ -49,10 +50,10 @@ impl<'a> Iterator for BuildsWalker<'a> {
 }
 
 impl<'a> BuildsWalker<'a> {
-    pub fn new(filter: &'a Selection, path: &'a str, platforms: &'a [Platform]) -> Self {
+    pub fn new<P: AsRef<Path>>(filter: &'a Selection, path: P, platforms: &'a [Platform]) -> Self {
         Self {
             filter,
-            path,
+            path: path.as_ref().to_path_buf(),
             platforms,
             walker: WalkDir::new(path).into_iter(),
         }

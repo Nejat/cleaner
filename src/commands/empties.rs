@@ -1,5 +1,5 @@
 use std::fs::remove_dir_all;
-use std::path::{MAIN_SEPARATOR, PathBuf};
+use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
 use inquire::Confirm;
 
@@ -7,7 +7,7 @@ use crate::commands::walkers::EmptiesWalker;
 use crate::utils::{display_error_and_exit, validate_path};
 
 /// Lists empty folders
-pub fn list_empties(path: &str, show_hidden: bool) {
+pub fn list_empties<P: AsRef<Path>>(path: P, show_hidden: bool) {
     empties_handler(
         "list", path, show_hidden,
         |_, msg| {
@@ -19,8 +19,8 @@ pub fn list_empties(path: &str, show_hidden: bool) {
 }
 
 /// Removes empty folders
-pub fn remove_empties(
-    path: &str, confirmed: bool, show_hidden: bool,
+pub fn remove_empties<P: AsRef<Path>>(
+    path: P, confirmed: bool, show_hidden: bool,
 ) {
     empties_handler(
         "remove", path, show_hidden,
@@ -53,18 +53,21 @@ pub fn remove_empties(
 }
 
 /// Common empties handling logic
-fn empties_handler<F>(
-    action: &str, path: &str, show_hidden: bool, handler: F,
+fn empties_handler<F, P: AsRef<Path>>(
+    action: &str, path: P, show_hidden: bool, handler: F,
 )
     where F: Fn(&PathBuf, &str) -> Result<(), String>
 {
+    let path = path.as_ref();
+    let path_str = path.to_string_lossy();
+
     validate_path(path);
 
     let mut found = 0;
 
     for entry in EmptiesWalker::new(path, show_hidden) {
-        let offset = usize::from(!path.ends_with(MAIN_SEPARATOR));
-        let output = entry.to_string_lossy()[path.len() + offset..].to_string();
+        let offset = usize::from(!path_str.ends_with(MAIN_SEPARATOR));
+        let output = entry.to_string_lossy()[path_str.len() + offset..].to_string();
 
         if let Err(err) = handler(&entry, &output) {
             display_error_and_exit(
@@ -75,5 +78,5 @@ fn empties_handler<F>(
         found += 1;
     }
 
-    if found == 0 { println!("No empties found at \"{path}\""); }
+    if found == 0 { println!("No empties found at \"{path_str}\""); }
 }

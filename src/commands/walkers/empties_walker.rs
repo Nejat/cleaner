@@ -1,13 +1,13 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
 use crate::utils::display_error_and_exit;
 
 /// Recursively walks the folders in a path looking for empties
-pub struct EmptiesWalker<'a> {
+pub struct EmptiesWalker {
     /// Path to recursively walk
-    pub path: &'a str,
+    pub path: PathBuf,
 
     /// Show empty hidden folders switch
     pub show_hidden: bool,
@@ -16,7 +16,7 @@ pub struct EmptiesWalker<'a> {
     pub walker: IntoIter,
 }
 
-impl<'a> Iterator for EmptiesWalker<'a> {
+impl Iterator for EmptiesWalker {
     type Item = PathBuf;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -57,7 +57,7 @@ impl<'a> Iterator for EmptiesWalker<'a> {
                 }
                 Err(err) => {
                     display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for empties: {err}", self.path)
+                        &format!("Exception while searching \"{}\" for empties: {err}", self.path.to_string_lossy())
                     );
                 }
             }
@@ -65,10 +65,10 @@ impl<'a> Iterator for EmptiesWalker<'a> {
     }
 }
 
-impl<'a> EmptiesWalker<'a> {
-    pub fn new(path: &'a str, show_hidden: bool) -> Self {
+impl EmptiesWalker {
+    pub fn new<P: AsRef<Path>>(path: P, show_hidden: bool) -> Self {
         Self {
-            path,
+            path: path.as_ref().to_path_buf(),
             show_hidden,
             walker: WalkDir::new(path).into_iter(),
         }
@@ -83,7 +83,7 @@ impl<'a> EmptiesWalker<'a> {
                 Ok(e) => e.file_type().is_file(),
                 Err(err) => {
                     display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for empties: {err}", self.path)
+                        &format!("Exception while searching \"{}\" for empties: {err}", self.path.to_string_lossy())
                     );
                 }
             }

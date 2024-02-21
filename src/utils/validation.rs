@@ -1,12 +1,12 @@
 use std::collections::HashSet;
-use std::path::PathBuf;
+use std::path::Path;
 
 use crate::{Platform, Selection, supported_platforms, utils};
 use crate::utils::{display_error_and_exit, list_output};
 
 /// Validates a given path exists and it is a folder
-pub fn validate_path(path: &str) {
-    let path = PathBuf::from(path);
+pub fn validate_path<P: AsRef<Path>>(path: P) {
+    let path = path.as_ref();
 
     if !path.exists() {
         display_error_and_exit(
