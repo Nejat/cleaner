@@ -1,12 +1,10 @@
 use std::fs::remove_dir_all;
 use std::path::{MAIN_SEPARATOR, Path};
 
-use inquire::Confirm;
-
 use crate::{Platform, Selection};
 use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
-use crate::utils::{display_error_and_exit, validate_path, validate_platforms_filter};
+use crate::utils::{display_error_and_exit, get_confirmation, validate_path, validate_platforms_filter};
 
 /// Lists matching build artifacts
 pub fn list_build_artifacts<P: AsRef<Path>>(path: P, filter: &Selection, platforms: &[Platform]) {
@@ -27,23 +25,7 @@ pub fn remove_build_artifacts<P: AsRef<Path>>(
     build_artifacts_handler(
         "remove", path, filter, platforms,
         move |artifact, msg| {
-            let mut do_it = confirmed;
-
-            if !confirmed {
-                let confirmation = Confirm::new(&format!("remove {msg}"))
-                    .with_default(false)
-                    .with_placeholder("N")
-                    .prompt();
-
-                match confirmation {
-                    Ok(answer) => do_it = answer,
-                    Err(err) => {
-                        display_error_and_exit(&format!("Exception processing input: {err}"));
-                    }
-                }
-            };
-
-            if do_it {
+            if confirmed || get_confirmation(&msg) {
                 remove_dir_all(&artifact.folder).map_err(|err| format!("{err}"))?;
                 if confirmed { println!("  - {msg} - removed"); }
             }

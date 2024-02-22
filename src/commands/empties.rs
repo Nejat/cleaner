@@ -1,10 +1,8 @@
 use std::fs::remove_dir_all;
 use std::path::{MAIN_SEPARATOR, Path, PathBuf};
 
-use inquire::Confirm;
-
 use crate::commands::walkers::EmptiesWalker;
-use crate::utils::{display_error_and_exit, validate_path};
+use crate::utils::{display_error_and_exit, get_confirmation, validate_path};
 
 /// Lists empty folders
 pub fn list_empties<P: AsRef<Path>>(path: P, show_hidden: bool) {
@@ -25,23 +23,7 @@ pub fn remove_empties<P: AsRef<Path>>(
     empties_handler(
         "remove", path, show_hidden,
         move |empty, msg| {
-            let mut do_it = confirmed;
-
-            if !confirmed {
-                let confirmation = Confirm::new(&format!("remove {msg}"))
-                    .with_default(false)
-                    .with_placeholder("N")
-                    .prompt();
-
-                match confirmation {
-                    Ok(answer) => do_it = answer,
-                    Err(err) => {
-                        display_error_and_exit(&format!("Exception processing input: {err}"));
-                    }
-                }
-            };
-
-            if do_it {
+            if confirmed || get_confirmation(&msg) {
                 remove_dir_all(empty).map_err(|err| format!("{err}"))?;
 
                 if confirmed { println!("  - {msg} - removed"); }
