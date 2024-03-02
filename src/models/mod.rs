@@ -1,7 +1,9 @@
-pub use crate::models::build::BuildArtifacts;
-pub use crate::models::filter::Filter;
-pub use crate::models::platform::Platform;
+pub use branch::BranchName;
+pub use build::BuildArtifacts;
+pub use filter::Filter;
+pub use platform::Platform;
 
 mod build;
+mod branch;
 mod filter;
 mod platform;
