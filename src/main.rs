@@ -8,6 +8,7 @@
 // ==============================================================
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::items_after_statements)]
+#![allow(clippy::multiple_crate_versions)] // multiple bitflags versions
 // ==============================================================
 #![doc(html_root_url = "https://docs.rs/cleaner/0.9.2")]
 
@@ -26,10 +27,19 @@ use crate::cli::CLI;
 use crate::cli::commands::builds::Builds;
 use crate::cli::commands::Commands;
 use crate::cli::commands::empties::Empties;
+use crate::cli::commands::repos::Repos;
 use crate::cli::commands::supported::Supported;
 use crate::cli::selection::Selection;
 use crate::commands::empties::{list_empties, remove_empties};
-use crate::commands::supported::{manage_configuration, reset_configuration, show_configuration, supported_platforms};
+use crate::commands::repos::{
+    list_outdated_repos, list_repos_that_are_branched, list_repos_that_are_init_only,
+    list_repos_with_branch, list_repos_with_detached_head, list_repos_with_errors,
+    list_repos_with_uncommitted_changes, list_repos_without_configured_remotes,
+    list_up_to_date_repos,
+};
+use crate::commands::supported::{
+    manage_configuration, reset_configuration, show_configuration, supported_platforms,
+};
 use crate::models::Platform;
 use crate::utils::load_supported_platforms;
 
@@ -73,6 +83,26 @@ fn main() {
             manage_configuration(),
         Commands::Supported(Supported::Reset { confirmed }) =>
             reset_configuration(*confirmed),
+        Commands::Repos(Repos::Branched { path }) =>
+            list_repos_that_are_branched(path),
+        Commands::Repos(Repos::Changes { path }) =>
+            list_repos_with_uncommitted_changes(path),
+        Commands::Repos(Repos::Detached { path }) =>
+            list_repos_with_detached_head(path),
+        Commands::Repos(Repos::Error { path }) =>
+            list_repos_with_errors(path),
+        Commands::Repos(Repos::Init { path }) =>
+            list_repos_that_are_init_only(path),
+        Commands::Repos(Repos::Local { path }) =>
+            list_repos_without_configured_remotes(path),
+        Commands::Repos(Repos::Main { path }) =>
+            list_repos_with_branch(path, "main"),
+        Commands::Repos(Repos::Master { path }) =>
+            list_repos_with_branch(path, "master"),
+        Commands::Repos(Repos::Outdated { path, filter, main }) =>
+            list_outdated_repos(path, *filter, *main),
+        Commands::Repos(Repos::UpToDate { path, main }) =>
+            list_up_to_date_repos(path, *main)
     }
 
     println!();

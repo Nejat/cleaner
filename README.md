@@ -27,21 +27,20 @@ _\* requires rust and cargo - [Rust Install Instructions](https://rustup.rs/)_
 ## Usage
 
 ```
-cleaner 0.9.2
 Cleaner is a utility for cleaning up build artifacts in bulk
 
-USAGE:
-    cleaner <SUBCOMMAND>
+Usage: cleaner.exe <COMMAND>
 
-OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  builds     Manage build artifacts of supported platforms
+  empties    Manage empty folders
+  repos      Search through repos
+  supported  Manage supported development platforms
+  help       Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    builds       Manage build artifacts of supported platforms
-    empties      Manage empty folders
-    help         Print this message or the help of the given subcommand(s)
-    supported    Manage supported development platforms
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 ## Commands
@@ -51,21 +50,18 @@ SUBCOMMANDS:
 Manages build artifacts of configured platforms
 
 ```
-> cleaner builds
-cleaner-builds 0.9.2
 Manage build artifacts of supported platforms
 
-USAGE:
-    cleaner builds <SUBCOMMAND>
+Usage: cleaner.exe builds <COMMAND>
 
-OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  list    List matching build artifacts
+  remove  Remove matching build artifacts
+  help    Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    help      Print this message or the help of the given subcommand(s)
-    list      List matching build artifacts
-    remove    Remove matching build artifacts
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 #### Builds List
@@ -73,31 +69,29 @@ SUBCOMMANDS:
 List matching build artifacts
 
 ```
-cleaner-builds-list 0.9.2
 List matching build artifacts
 
-USAGE:
-    cleaner builds list [OPTIONS] [PATH]
+Usage: cleaner.exe builds list [OPTIONS] [PATH]
 
-ARGS:
-    <PATH>
-            Optionally specify target path, defaults to current folder
-            
-            [default: .]
+Arguments:
+  [PATH]
+          Optionally specify target path, defaults to current folder
 
-OPTIONS:
-    -h, --help
-            Print help information
+          [default: .]
 
-    -t, --types <TYPES>
-            Optionally specify supported development platform(s), defaults to "all"
-            
-            * use "supported" command to see a list of all supported development platforms
-            
-            [default: all]
+Options:
+  -t, --types <TYPES>
+          Optionally specify supported development platform(s), defaults to "all"
 
-    -V, --version
-            Print version information
+          * use "supported" command to see a list of all supported development platforms
+
+          [default: all]
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 ```
 
 #### Builds Remove
@@ -105,34 +99,32 @@ OPTIONS:
 Remove matching build artifacts
 
 ```
-cleaner-builds-remove 0.9.2
 Remove matching build artifacts
 
-USAGE:
-    cleaner builds remove [OPTIONS] [PATH]
+Usage: cleaner.exe builds remove [OPTIONS] [PATH]
 
-ARGS:
-    <PATH>
-            Optionally specify target path, defaults to current folder
-            
-            [default: .]
+Arguments:
+  [PATH]
+          Optionally specify target path, defaults to current folder
 
-OPTIONS:
-    -h, --help
-            Print help information
+          [default: .]
 
-    -t, --types <TYPES>
-            Optionally specify supported development platform(s), defaults to "all"
-            
-            * use "supported" command to see a list of all supported development platforms
-            
-            [default: all]
+Options:
+  -t, --types <TYPES>
+          Optionally specify supported development platform(s), defaults to "all"
 
-    -V, --version
-            Print version information
+          * use "supported" command to see a list of all supported development platforms
 
-    -y, --confirmed
-            Executes remove action without confirmation, defaults to interactive confirmation
+          [default: all]
+
+  -y, --confirmed
+          Executes remove action without confirmation, defaults to interactive confirmation
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
 ```
 
 ### Empties
@@ -140,20 +132,18 @@ OPTIONS:
 Manages empty folders, skips hidden folder by default
 
 ```
-cleaner-empties 0.9.2
 Manage empty folders
 
-USAGE:
-    cleaner empties <SUBCOMMAND>
+Usage: cleaner.exe empties <COMMAND>
 
-OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  list    List matching empty folders
+  remove  Remove matching empty folders
+  help    Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    help      Print this message or the help of the given subcommand(s)
-    list      List matching empty folders
-    remove    Remove matching empty folders
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 #### Empties List
@@ -161,19 +151,17 @@ SUBCOMMANDS:
 List matching empty folders
 
 ```
-cleaner-empties-list 0.9.2
 List matching empty folders
 
-USAGE:
-    cleaner empties list [OPTIONS] [PATH]
+Usage: cleaner.exe empties list [OPTIONS] [PATH]
 
-ARGS:
-    <PATH>    Optionally specify target path, defaults to current folder [default: .]
+Arguments:
+  [PATH]  Optionally specify target path, defaults to current folder [default: .]
 
-OPTIONS:
-    -h, --help       Print help information
-    -s, --hidden     Includes empty hidden folders, i.e. folders that start with a '.'
-    -V, --version    Print version information
+Options:
+  -s, --hidden   Includes empty hidden folders, i.e. folders that start with a '.'
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 #### Empties Remove
@@ -181,21 +169,99 @@ OPTIONS:
 Remove matching empty folders
 
 ```
-cleaner-empties-remove 0.9.2
 Remove matching empty folders
 
-USAGE:
-    cleaner empties remove [OPTIONS] [PATH]
+Usage: cleaner.exe empties remove [OPTIONS] [PATH]
 
-ARGS:
-    <PATH>    Optionally specify target path, defaults to current folder [default: .]
+Arguments:
+  [PATH]  Optionally specify target path, defaults to current folder [default: .]
 
-OPTIONS:
-    -h, --help         Print help information
-    -s, --hidden       Includes empty hidden folders, i.e. folders that start with a '.'
-    -V, --version      Print version information
-    -y, --confirmed    Executes remove action without confirmation, defaults to interactive
-                       confirmation
+Options:
+  -y, --confirmed  Executes remove action without confirmation, defaults to interactive confirmation
+  -s, --hidden     Includes empty hidden folders, i.e. folders that start with a '.'
+  -h, --help       Print help
+  -V, --version    Print version
+```
+
+### Repos
+
+Search through GIT repositories
+
+```
+Search through repos
+
+Usage: cleaner.exe repos <COMMAND>
+
+Commands:
+  branched    List repositories not in master or main
+  changes     List repositories with uncommitted changes
+  detached    List detached repositories, HEAD
+  error       List repositories with errors
+  init        List repositories that are only initialized (unborn)
+  local       List repositories with no remotes configured
+  main        List repositories with a "Main" branch
+  master      List repositories with a "Master" branch
+  outdated    List outdated repos
+  up-to-date  List repositories that are up-to-date
+  help        Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+```
+
+#### Outdated
+
+Search for Git Repositories that are not in sync with its remote(s)
+
+```
+List outdated repos
+
+Usage: cleaner.exe repos outdated [OPTIONS] [PATH]
+
+Arguments:
+  [PATH]
+          Optionally specify target path, defaults to current folder
+
+          [default: .]
+
+Options:
+  -f, --filter <FILTER>
+          Filters outdated repos
+
+          [default: either]
+
+          Possible values:
+          - ahead:  Only include outdated repos that are ahead in commits of the remote
+          - either: Either Ahead or Behind (Default Value)
+          - behind: Only include outdated repos that are behind in commits of the remote
+
+  -m, --main
+          Only check repo's Main branch
+
+  -h, --help
+          Print help (see a summary with '-h')
+
+  -V, --version
+          Print version
+```
+
+#### Up To Date
+
+Search for Git Repositories that are in sync with its remote(s)
+
+```
+List repositories that are up-to-date
+
+Usage: cleaner.exe repos up-to-date [OPTIONS] [PATH]
+
+Arguments:
+  [PATH]  Optionally specify target path, defaults to current folder [default: .]
+
+Options:
+  -m, --main     Only check repo's Main branch
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 ### Supported
@@ -203,22 +269,20 @@ OPTIONS:
 Supported development platforms configuration
 
 ```
-cleaner-supported 0.9.2
 Manage supported development platforms
 
-USAGE:
-    cleaner.exe supported [SUBCOMMAND]
+Usage: cleaner.exe supported <COMMAND>
 
-OPTIONS:
-    -h, --help       Print help information
-    -V, --version    Print version information
+Commands:
+  list    List configured development platforms
+  path    Show path of platform configuration file
+  manage  Manage platform configuration
+  reset   Reset platform configuration to default
+  help    Print this message or the help of the given subcommand(s)
 
-SUBCOMMANDS:
-    help      Print this message or the help of the given subcommand(s)
-    list      List configured development platforms
-    manage    Manage platform configuration
-    path      Show path of platform configuration file
-    reset     Reset platform configuration to default
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
 ```
 
 #### Supported List
@@ -227,17 +291,25 @@ Initial/Default list of supported platforms
 
 ```
 
-Platform: .Net
+Platform:          .Net
   Build Artifacts: bin & obj
-  Matched On: *.sln & *.csproj
+  Matched On:      *.sln & *.csproj
 
-Platform: Rust
+Platform:          Rust
   Build Artifacts: target
-  Matched On: cargo.toml
+  Matched On:      cargo.toml
 
-Platform: Web
+Platform:          Web
   Build Artifacts: node_modules
-  Matched On: package.json
+  Matched On:      package.json
+
+Platform:          Angular
+  Build Artifacts: .angular & .run
+  Matched On:      angular.json
+
+Platform:          Typescript
+  Build Artifacts: dist
+  Matched On:      tsconfig.json
 
 ```
 
