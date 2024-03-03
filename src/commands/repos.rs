@@ -105,6 +105,15 @@ macro_rules! ok {
 
 static RE_MAIN_OR_MASTER: once_cell::sync::OnceCell<regex::Regex> = once_cell::sync::OnceCell::new();
 
+pub fn list_repos<P: AsRef<Path>>(path: P) {
+    repos_handler(
+        path,
+        |_, _| (true, Message::None),
+        &OnError::None,
+        || "Did not find any repos",
+    );
+}
+
 pub fn list_repos_with_detached_head<P: AsRef<Path>>(path: P) {
     repos_handler(
         path,

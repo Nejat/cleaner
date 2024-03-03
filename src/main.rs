@@ -32,10 +32,11 @@ use crate::cli::commands::supported::Supported;
 use crate::cli::selection::Selection;
 use crate::commands::empties::{list_empties, remove_empties};
 use crate::commands::repos::{
-    list_outdated_repos, list_repos_that_are_branched, list_repos_that_are_init_only,
-    list_repos_with_branch, list_repos_with_detached_head, list_repos_with_errors,
-    list_repos_with_uncommitted_changes, list_repos_without_configured_remotes,
-    list_up_to_date_repos,
+    list_outdated_repos, list_repos, list_repos_that_are_branched,
+    list_repos_that_are_init_only, list_repos_with_branch,
+    list_repos_with_detached_head, list_repos_with_errors,
+    list_repos_with_uncommitted_changes,
+    list_repos_without_configured_remotes, list_up_to_date_repos,
 };
 use crate::commands::supported::{
     manage_configuration, reset_configuration, show_configuration, supported_platforms,
@@ -93,6 +94,8 @@ fn main() {
             list_repos_with_errors(path),
         Commands::Repos(Repos::Init { path }) =>
             list_repos_that_are_init_only(path),
+        Commands::Repos(Repos::List { path }) =>
+            list_repos(path),
         Commands::Repos(Repos::Local { path }) =>
             list_repos_without_configured_remotes(path),
         Commands::Repos(Repos::Main { path }) =>

@@ -198,6 +198,7 @@ Commands:
   detached    List detached repositories, HEAD
   error       List repositories with errors
   init        List repositories that are only initialized (unborn)
+  list        List repositories
   local       List repositories with no remotes configured
   main        List repositories with a "Main" branch
   master      List repositories with a "Master" branch

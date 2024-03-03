@@ -31,6 +31,12 @@ pub enum Repos {
         #[clap(required = false, verbatim_doc_comment, default_value = ".")]
         path: String,
     },
+    /// List repositories
+    List {
+        /// Optionally specify target path, defaults to current folder
+        #[clap(required = false, verbatim_doc_comment, default_value = ".")]
+        path: String,
+    },
     /// List repositories with no remotes configured
     Local {
         /// Optionally specify target path, defaults to current folder
