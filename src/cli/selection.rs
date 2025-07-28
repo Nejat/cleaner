@@ -35,7 +35,7 @@ impl Selection {
     }
 
     /// Helper method for determining if input requires pluralization
-    pub fn pluralize<'a>(&'a self, plural: &'a str) -> &'a str {
+    pub const fn pluralize<'a>(&'a self, plural: &'a str) -> &'a str {
         match self {
             Self::All => plural,
             Self::Select { values } if values.len() > 1 => plural,

@@ -3,11 +3,11 @@
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use git2::string_array::StringArray;
 use git2::{
-    Branch, Branches, BranchType, Config, Cred, Direction, Error, ErrorCode, FetchOptions,
+    Branch, BranchType, Branches, Config, Cred, Direction, Error, ErrorCode, FetchOptions,
     Reference, Remote, RemoteCallbacks, Repository, StatusOptions,
 };
-use git2::string_array::StringArray;
 use rayon::prelude::*;
 use regex::Regex;
 
@@ -19,7 +19,7 @@ use crate::utils::validate_path;
 type OnError = Option<Box<dyn Fn(Error, &'_ str) -> bool + Sync>>;
 type Message = Option<String>;
 
-// outputs errors for repos, with and optional message prefix (only relevant in this module) 
+// outputs errors for repos, with and optional message prefix (only relevant in this module)
 macro_rules! output_err {
     ($err: ident, $path: expr) => {
         if $err.code() != ErrorCode::UnbornBranch {
@@ -39,7 +39,7 @@ macro_rules! output_err {
     };
 }
 
-// macrofies project's mundane error specifically working with repos (only valid in this module) 
+// macrofies project's mundane error specifically working with repos (only valid in this module)
 macro_rules! ok {
     // default, continue loop
     ($result: expr) => {
@@ -109,7 +109,7 @@ pub fn list_repos<P: AsRef<Path>>(path: P) {
     repos_handler(
         path,
         |_, _| (true, Message::None),
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any repos",
     );
 }
@@ -118,20 +118,21 @@ pub fn list_repos_with_detached_head<P: AsRef<Path>>(path: P) {
     repos_handler(
         path,
         |repo, repo_path| (ok!(hndlr; repo.head_detached(), repo_path), Message::None),
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any detached repos",
     );
 }
 
 pub fn list_repos_with_errors<P: AsRef<Path>>(path: P) {
+    let handler = |err: Error, repo_path: &'_ str| {
+        output_err!(err, repo_path);
+
+        true
+    };
     repos_handler(
         path,
         |_, _| (false, Message::None),
-        &Some(|err: Error, repo_path: &'_ str| {
-            output_err!(err, repo_path);
-
-            true
-        }),
+        Some(&handler),
         || "Did not find any repos with errors",
     );
 }
@@ -143,7 +144,7 @@ pub fn list_repos_that_are_branched<P: AsRef<Path>>(path: P) {
             repo_is_branched(repo, repo_path)
                 .map_or((false, Message::None), |branched| (branched, Message::None))
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any repos that are in branch",
     );
 }
@@ -158,7 +159,7 @@ pub fn list_repos_that_are_init_only<P: AsRef<Path>>(path: P) {
 
             (init_only, Message::None)
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any init only repos",
     );
 }
@@ -172,7 +173,7 @@ pub fn list_repos_with_branch<P: AsRef<Path>>(path: P, branch_name: &str) {
 
             (branch.is_some(), Message::None)
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || format!("Did not find any repos with a \"{branch_name}\" branch"),
     );
 }
@@ -189,7 +190,7 @@ pub fn list_repos_with_uncommitted_changes<P: AsRef<Path>>(path: P) {
 
             (changes > 0, Some(format!("changes: {changes}")))
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any repos with uncommitted changes",
     );
 }
@@ -203,7 +204,7 @@ pub fn list_repos_without_configured_remotes<P: AsRef<Path>>(path: P) {
 
             (has_remotes, Message::None)
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any repos with out remotes",
     );
 }
@@ -230,7 +231,7 @@ pub fn list_outdated_repos<P: AsRef<Path>>(path: P, filter: OutdatedFilter, only
 
             (result, Message::None)
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any outdated repos",
     );
 }
@@ -251,7 +252,7 @@ pub fn list_up_to_date_repos<P: AsRef<Path>>(path: P, only_main: bool) {
 
             (result, Message::None)
         },
-        &OnError::None,
+        OnError::None.as_ref(),
         || "Did not find any up-to-date repos",
     );
 }
@@ -281,10 +282,10 @@ fn check_branch_status<'a>(
 ) -> impl Iterator<Item=bool> + 'a {
     branches.into_iter()
         .filter_map(move |branch| {
-            let Ok((branch, _)) = branch else { return None; };
-            let Ok(upstream) = branch.upstream() else { return None; };
-            let Some(oid) = branch.into_reference().target() else { return None; };
-            let Some(upstream_oid) = upstream.into_reference().target() else { return None; };
+            let (branch, _) = branch.ok()?;
+            let upstream = branch.upstream().ok()?;
+            let oid = branch.into_reference().target()?;
+            let upstream_oid = upstream.into_reference().target()?;
             let (branch, upstream) = ok!(opt; repo.graph_ahead_behind(oid, upstream_oid), repo_path);
 
             Some(predicate(branch, upstream))
@@ -351,7 +352,7 @@ fn find_local_branch<'a, P>(
     let branch = branches.find(|branch| {
         let Ok((branch, _)) = branch else { return false; };
 
-        branch.name().unwrap_or_default().map_or(false, predicate)
+        branch.name().unwrap_or_default().is_some_and(predicate)
     });
 
     match branch {
@@ -393,7 +394,7 @@ fn re_main_or_master() -> &'static Regex {
     RE_MAIN_OR_MASTER.get_or_init(|| Regex::new("^(refs/heads/)?(main|master)$").unwrap())
 }
 
-fn repos_handler<P, S, H, OE, E, NF>(path: P, handler: H, on_error: &Option<OE>, not_found: NF)
+fn repos_handler<P, S, H, OE, E, NF>(path: P, handler: H, on_error: Option<&OE>, not_found: NF)
     where
         P: AsRef<Path>,
         S: AsRef<str>,
@@ -449,7 +450,7 @@ fn repo_is_branched(repo: &Repository, repo_path: &str) -> Option<bool> {
 
     Some(
         ok!(opt; repo.head(), repo_path).name()
-            .map_or(false, |head_name| !main_branch.is_match(head_name)),
+            .is_some_and(|head_name| !main_branch.is_match(head_name))
     )
 }
 

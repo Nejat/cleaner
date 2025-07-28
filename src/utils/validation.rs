@@ -28,6 +28,8 @@ pub fn validate_platform(platform: &Platform) -> bool {
 
 /// Validates all platforms
 pub fn validate_platforms(platforms: &[Platform]) {
+    use std::fmt::Write as _;
+
     let has_platforms_with_spaces = platforms.iter().any(|p| p.name.contains(' '));
     let not_unique_names = platforms.iter()
         .map(|p| p.name.to_lowercase())
@@ -84,7 +86,7 @@ pub fn validate_platforms(platforms: &[Platform]) {
         let configuration_path = utils::path_of_supported_platforms_configuration();
         let configuration_path = configuration_path.to_string_lossy();
 
-        message.push_str(&format!("\n\nConfigurations file requires manual fix: {configuration_path}"));
+        let _ = write!(message, "\n\nConfigurations file requires manual fix: {configuration_path}");
     }
 
     if !message.is_empty() {

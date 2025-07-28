@@ -7,7 +7,7 @@ pub enum BranchName<'a> {
     Head(Oid),
 }
 
-impl<'a> Display for BranchName<'a> {
+impl Display for BranchName<'_> {
     fn fmt(&self, fmt: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Branch(name) =>

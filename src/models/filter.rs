@@ -45,7 +45,7 @@ impl<'de> Deserialize<'de> for Filter {
 
 struct StringVisitor;
 
-impl<'de> Visitor<'de> for StringVisitor {
+impl Visitor<'_> for StringVisitor {
     type Value = String;
 
     fn expecting(&self, fmt: &mut Formatter) -> std::fmt::Result {

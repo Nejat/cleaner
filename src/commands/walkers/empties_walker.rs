@@ -12,7 +12,7 @@ pub struct EmptiesWalker {
     /// Show empty hidden folders switch
     pub show_hidden: bool,
 
-    /// WalkDir iterator
+    /// `WalkDir` iterator
     pub walker: IntoIter,
 }
 
@@ -32,7 +32,7 @@ impl Iterator for EmptiesWalker {
 
                     let hidden_folder = entry.path()
                         .file_name()
-                        .map_or(false, |p| p.to_str().map_or(false, |s| s.starts_with('.')));
+                        .is_some_and(|p| p.to_str().is_some_and(|s| s.starts_with('.')));
 
                     // skip hidden entries if skip empty hidden entry
                     if hidden_folder && !self.show_hidden {
@@ -52,7 +52,6 @@ impl Iterator for EmptiesWalker {
                     // skip hidden entry that is not empty
                     if hidden_folder {
                         self.walker.skip_current_dir();
-                        continue;
                     }
                 }
                 Err(err) => {

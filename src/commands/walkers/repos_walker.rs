@@ -10,7 +10,7 @@ pub struct ReposWalker {
     /// Path to recursively walk
     pub path: PathBuf,
 
-    /// WalkDir iterator
+    /// `WalkDir` iterator
     pub walker: IntoIter,
 }
 

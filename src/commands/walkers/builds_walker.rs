@@ -18,7 +18,7 @@ pub struct BuildsWalker<'a> {
     /// All supported platform filter
     pub platforms: &'a [Platform],
 
-    /// WalkDir iterator
+    /// `WalkDir` iterator
     pub walker: IntoIter,
 }
 
@@ -74,7 +74,7 @@ impl<'a> BuildsWalker<'a> {
 
                 if let Ok(files) = read_dir(&parent) {
                     if files.filter(
-                        |v| v.as_ref().map_or(false, |file| {
+                        |v| v.as_ref().is_ok_and(|file| {
                             let file_name = file.file_name().to_string_lossy().to_lowercase();
 
                             platform.associated.iter().any(|f| f.matches(&file_name))
