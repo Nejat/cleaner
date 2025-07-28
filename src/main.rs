@@ -10,7 +10,7 @@
 #![allow(clippy::items_after_statements)]
 #![allow(clippy::multiple_crate_versions)] // multiple bitflags versions
 // ==============================================================
-#![doc(html_root_url = "https://docs.rs/cleaner/0.10.1")]
+#![doc(html_root_url = "https://docs.rs/cleaner/0.11.0")]
 
 #[macro_use]
 extern crate clap;
