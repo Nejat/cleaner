@@ -16,7 +16,9 @@ pub fn list_output<T: AsRef<str>>(source: &[T]) -> String {
     let skip_first = Once::new();
 
     for item in source.iter().take(source.len() - 1) {
-        if add_separator { output.push_str(SEPARATOR); }
+        if add_separator {
+            output.push_str(SEPARATOR);
+        }
 
         skip_first.call_once(|| add_separator = true);
 

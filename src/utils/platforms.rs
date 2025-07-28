@@ -58,13 +58,12 @@ pub fn load_supported_platforms() -> Vec<Platform> {
 
                 match confirmation {
                     Ok(true) => retry = true,
-                    _ => display_error_and_exit(&message)
+                    _ => display_error_and_exit(&message),
                 }
             }
         }
     }
 }
-
 
 /// Gets the path of the supported platforms configuration json file
 pub fn path_of_supported_platforms_configuration() -> PathBuf {

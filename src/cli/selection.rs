@@ -12,9 +12,7 @@ pub enum Selection {
 
     /// Defines only specific values
     #[clap(verbatim_doc_comment)]
-    Select {
-        values: Vec<String>
-    },
+    Select { values: Vec<String> },
 }
 
 impl Selection {
@@ -30,7 +28,7 @@ impl Selection {
     pub fn matches(&self, checked: &str) -> bool {
         match self {
             Self::All => true,
-            Self::Select { values } => values.iter().any(|v| v.eq_ignore_ascii_case(checked))
+            Self::Select { values } => values.iter().any(|v| v.eq_ignore_ascii_case(checked)),
         }
     }
 

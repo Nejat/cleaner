@@ -7,7 +7,10 @@ use inquire::validator::StringValidator;
 use inquire::{Confirm, MultiSelect, Select, Text};
 
 use crate::models::Filter;
-use crate::utils::{display_error_and_exit, list_output, path_of_supported_platforms_configuration, validate_platform, validate_unique_values};
+use crate::utils::{
+    display_error_and_exit, list_output, path_of_supported_platforms_configuration,
+    validate_platform, validate_unique_values,
+};
 use crate::{Platform, PLATFORMS};
 
 /// Manage supported platforms configuration
@@ -35,8 +38,16 @@ pub fn manage_configuration() {
             Ok(ADD) => modified = add_new_platform(&mut platforms) || modified,
             Ok(DELETE) => modified = delete_platforms(&mut platforms) || modified,
             Ok(MODIFY) => modified = modify_a_platform(&mut platforms) || modified,
-            Ok(SAVE) => if !modified || save_platforms(&platforms) { break; },
-            Ok(CANCEL) => if !modified || confirmed("Unsaved changes will be lost") { break; },
+            Ok(SAVE) => {
+                if !modified || save_platforms(&platforms) {
+                    break;
+                }
+            }
+            Ok(CANCEL) => {
+                if !modified || confirmed("Unsaved changes will be lost") {
+                    break;
+                }
+            }
             Ok(LIST) => {
                 println!();
                 supported_platforms(&platforms);
@@ -61,7 +72,7 @@ pub fn reset_configuration(confirmed: bool) {
     }
 
     if super::supported::confirmed(
-        "By resetting your configuration you will loose any customization you have applied"
+        "By resetting your configuration you will loose any customization you have applied",
     ) {
         println!();
         reset_configuration_json();
@@ -72,44 +83,51 @@ pub fn reset_configuration(confirmed: bool) {
 pub fn supported_platforms(platforms: &[Platform]) {
     let mut separator = false;
     let skip_first = Once::new();
-    let dupes = platforms.iter().fold(
-        HashMap::new(),
-        |mut acc, next| {
+    let dupes = platforms
+        .iter()
+        .fold(HashMap::new(), |mut acc, next| {
             let entry = acc.entry(next.name.to_lowercase()).or_insert(0);
 
             *entry += 1;
 
             acc
-        },
-    )
+        })
         .into_iter()
-        .filter_map(|(key, count)| { if count > 1 { Some(key) } else { None } })
+        .filter_map(|(key, count)| if count > 1 { Some(key) } else { None })
         .collect::<HashSet<_>>();
 
-    let check_name = |name: &str| if dupes.contains(&name.to_lowercase()) {
-        " <<= duplicate platform name"
-    } else if name.contains(' ') {
-        " <<= name contains space(s)"
-    } else {
-        ""
+    let check_name = |name: &str| {
+        if dupes.contains(&name.to_lowercase()) {
+            " <<= duplicate platform name"
+        } else if name.contains(' ') {
+            " <<= name contains space(s)"
+        } else {
+            ""
+        }
     };
 
-    let check_builds = |builds: &[String]| if builds.is_empty() {
-        " <<= requires a build artifact"
-    } else if validate_unique_values(builds) {
-        ""
-    } else {
-        " <<= build artifacts need to be unique"
+    let check_builds = |builds: &[String]| {
+        if builds.is_empty() {
+            " <<= requires a build artifact"
+        } else if validate_unique_values(builds) {
+            ""
+        } else {
+            " <<= build artifacts need to be unique"
+        }
     };
 
-    let check_associated = |associated: &[String]| if validate_unique_values(associated) {
-        ""
-    } else {
-        " <<= associated files & folders need to be unique"
+    let check_associated = |associated: &[String]| {
+        if validate_unique_values(associated) {
+            ""
+        } else {
+            " <<= associated files & folders need to be unique"
+        }
     };
 
     for platform in platforms {
-        if separator { println!(); }
+        if separator {
+            println!();
+        }
 
         skip_first.call_once(|| separator = true);
 
@@ -119,12 +137,17 @@ pub fn supported_platforms(platforms: &[Platform]) {
 
 /// Shows the path of the configuration json file
 pub fn show_configuration() {
-    println!("{}", path_of_supported_platforms_configuration().to_string_lossy());
+    println!(
+        "{}",
+        path_of_supported_platforms_configuration().to_string_lossy()
+    );
 }
 
 /// Lets user interactively define and add a new platform to configuration
 fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
-    let Some(name) = get_platform_name(platforms, "") else { return false; };
+    let Some(name) = get_platform_name(platforms, "") else {
+        return false;
+    };
 
     let folders = get_a_collection_of_input("Add build artifact", &[], true, true);
 
@@ -134,13 +157,20 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
     }
 
     let associated = get_a_collection_of_input(
-        "Add file or folder name that identifies platform", &[], false, true,
+        "Add file or folder name that identifies platform",
+        &[],
+        false,
+        true,
     )
-        .into_iter()
-        .map(Filter::new)
-        .collect();
+    .into_iter()
+    .map(Filter::new)
+    .collect();
 
-    let platform = Platform { name, folders, associated };
+    let platform = Platform {
+        name,
+        folders,
+        associated,
+    };
 
     if let Some(equivalent) = platforms.iter().find(|p| p.same_as(&platform)) {
         println!("\n{:?} handles the same build artifacts\n", equivalent.name);
@@ -186,14 +216,20 @@ fn confirmed(message: &str) -> bool {
 fn delete_platforms(platforms: &mut Vec<Platform>) -> bool {
     let choices = platforms.iter().map(|p| p.name.clone()).collect::<Vec<_>>();
 
-    let Some(selected) = make_selections("platform(s) to delete", &choices) else { return false; };
+    let Some(selected) = make_selections("platform(s) to delete", &choices) else {
+        return false;
+    };
 
     let mut modified = false;
 
     for platform in selected {
-        let platform = platforms.iter().enumerate().find_map(
-            |(idx, p)| if p.name == platform { Some(idx) } else { None }
-        );
+        let platform = platforms.iter().enumerate().find_map(|(idx, p)| {
+            if p.name == platform {
+                Some(idx)
+            } else {
+                None
+            }
+        });
 
         if let Some(idx) = platform {
             platforms.remove(idx);
@@ -210,19 +246,32 @@ fn display_platform<'a, N, B, A>(
     name_check: N,
     build_check: B,
     associate_check: A,
-)
-    where N: Fn(&'a str) -> &'static str + 'a,
-          B: Fn(&'a [String]) -> &'static str + 'a,
-          A: Fn(&'a [String]) -> &'static str + 'a
+) where
+    N: Fn(&'a str) -> &'static str + 'a,
+    B: Fn(&'a [String]) -> &'static str + 'a,
+    A: Fn(&'a [String]) -> &'static str + 'a,
 {
-    println!("Platform:          {}{}", platform.name, name_check(&platform.name));
-    println!("  Build Artifacts: {}{}", list_output(&platform.folders), build_check(&platform.folders));
-    println!("  Matched On:      {}{}", list_output(&platform.associated), associate_check(&platform.folders));
+    println!(
+        "Platform:          {}{}",
+        platform.name,
+        name_check(&platform.name)
+    );
+    println!(
+        "  Build Artifacts: {}{}",
+        list_output(&platform.folders),
+        build_check(&platform.folders)
+    );
+    println!(
+        "  Matched On:      {}{}",
+        list_output(&platform.associated),
+        associate_check(&platform.folders)
+    );
 }
 
 /// Lets user select entries in a collection and deletes them
 fn delete_selected_entries<V>(values: &mut Vec<V>, what: &str)
-    where V: AsRef<str>
+where
+    V: AsRef<str>,
 {
     if let Some(deleted) = make_selections(&format!("{what} to delete"), values) {
         for item in deleted {
@@ -266,9 +315,11 @@ fn get_a_collection_of_input(
             Ok(input) => {
                 let input = input.trim();
 
-                collection.entry(input.to_lowercase()).or_insert_with(|| input.to_string());
+                collection
+                    .entry(input.to_lowercase())
+                    .or_insert_with(|| input.to_string());
             }
-            Err(_) => break
+            Err(_) => break,
         }
 
         end_message.call_once(|| message = AT_LEAST_ONE);
@@ -289,7 +340,9 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
     let choices = platforms.iter().map(|p| p.name.clone()).collect::<Vec<_>>();
 
-    let Some(selected) = make_a_selection("a platform to modify:", &choices) else { return false; };
+    let Some(selected) = make_a_selection("a platform to modify:", &choices) else {
+        return false;
+    };
 
     let platform_index = platforms.iter().position(|p| p.name == selected).unwrap();
     let original_platform = &platforms[platform_index];
@@ -298,61 +351,84 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
     let choices = vec![
         RENAME,
-        ADD_ARTIFACT, REMOVE_ARTIFACTS,
-        ADD_ASSOCIATED, REMOVE_ASSOCIATED,
-        ACCEPT, CANCEL,
+        ADD_ARTIFACT,
+        REMOVE_ARTIFACTS,
+        ADD_ASSOCIATED,
+        REMOVE_ASSOCIATED,
+        ACCEPT,
+        CANCEL,
     ];
     let modified_choices = vec![
-        ACCEPT, CANCEL,
+        ACCEPT,
+        CANCEL,
         RENAME,
-        ADD_ARTIFACT, REMOVE_ARTIFACTS,
-        ADD_ASSOCIATED, REMOVE_ASSOCIATED,
+        ADD_ARTIFACT,
+        REMOVE_ARTIFACTS,
+        ADD_ASSOCIATED,
+        REMOVE_ASSOCIATED,
     ];
 
     loop {
-        let choices = if modified { &modified_choices } else { &choices };
+        let choices = if modified {
+            &modified_choices
+        } else {
+            &choices
+        };
 
-        let Some(choice) = make_a_selection("a modification:", choices) else { return false; };
+        let Some(choice) = make_a_selection("a modification:", choices) else {
+            return false;
+        };
 
         match choice.as_str() {
-            RENAME =>
+            RENAME => {
                 if let Some(name) = get_platform_name(platforms, &modified_platform.name) {
                     modified_platform.name = name;
-                },
+                }
+            }
             ADD_ARTIFACT => {
                 let artifacts = get_a_collection_of_input(
                     "Add new artifacts",
                     &[&validate_unique(&modified_platform.folders, "artifacts")],
-                    false, true,
+                    false,
+                    true,
                 );
 
                 for artifact in artifacts {
                     modified_platform.folders.push(artifact);
                 }
             }
-            REMOVE_ARTIFACTS =>
-                delete_selected_entries(&mut modified_platform.folders, "artifacts"),
+            REMOVE_ARTIFACTS => {
+                delete_selected_entries(&mut modified_platform.folders, "artifacts")
+            }
             ADD_ASSOCIATED => {
                 let associated = get_a_collection_of_input(
                     "Add new associated",
-                    &[&validate_unique(&modified_platform.associated, "associated")],
-                    false, true,
+                    &[&validate_unique(
+                        &modified_platform.associated,
+                        "associated",
+                    )],
+                    false,
+                    true,
                 );
 
                 for item in associated {
                     modified_platform.associated.push(Filter::new(item));
                 }
             }
-            REMOVE_ASSOCIATED =>
-                delete_selected_entries(&mut modified_platform.associated, "associated"),
-            ACCEPT =>
-                if validate_platform(&modified_platform) { break; },
-            CANCEL =>
-                return false,
-            _ => unreachable!()
+            REMOVE_ASSOCIATED => {
+                delete_selected_entries(&mut modified_platform.associated, "associated")
+            }
+            ACCEPT => {
+                if validate_platform(&modified_platform) {
+                    break;
+                }
+            }
+            CANCEL => return false,
+            _ => unreachable!(),
         }
 
-        modified = modified_platform != *original_platform || !modified_platform.same_as(original_platform);
+        modified = modified_platform != *original_platform
+            || !modified_platform.same_as(original_platform);
     }
 
     let original_platform = &mut platforms[platform_index];
@@ -370,16 +446,20 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
 
 /// Let a user interactively select a value from a collection of choices
 fn make_a_selection<S>(message: &str, choices: &[S]) -> Option<String>
-    where S: AsRef<str>
+where
+    S: AsRef<str>,
 {
     let choices = choices.iter().map(|s| s.as_ref().to_string()).collect();
 
-    Select::new(&format!("Select {message}"), choices).prompt().ok()
+    Select::new(&format!("Select {message}"), choices)
+        .prompt()
+        .ok()
 }
 
 /// Let a user interactively selects values from a collection of choices
 fn make_selections<S>(message: &str, choices: &[S]) -> Option<Vec<String>>
-    where S: AsRef<str>
+where
+    S: AsRef<str>,
 {
     let choices = choices.iter().map(|s| s.as_ref().to_string()).collect();
     let selected = MultiSelect::new(&format!("Select one or more {message}:"), choices).prompt();
@@ -387,13 +467,15 @@ fn make_selections<S>(message: &str, choices: &[S]) -> Option<Vec<String>>
     match selected {
         Ok(selected) if selected.is_empty() => None,
         Ok(selected) => Some(selected),
-        Err(_) => None
+        Err(_) => None,
     }
 }
 
 // constant functions cannot evaluate destructors
 #[allow(clippy::missing_const_for_fn)]
-fn no_check<F>(_: F) -> &'static str { "" }
+fn no_check<F>(_: F) -> &'static str {
+    ""
+}
 
 /// Deletes supported platforms configuration file
 fn reset_configuration_json() {
@@ -402,7 +484,9 @@ fn reset_configuration_json() {
     if path.exists() {
         match remove_file(&path) {
             Ok(()) => println!("Configuration of supported platforms has been reset"),
-            Err(err) => display_error_and_exit(&format!("Exception resenting configuration: {err}"))
+            Err(err) => {
+                display_error_and_exit(&format!("Exception resenting configuration: {err}"))
+            }
         }
     }
 }
@@ -414,7 +498,9 @@ fn save_platforms(platforms: &[Platform]) -> bool {
         .truncate(true)
         .open(path_of_supported_platforms_configuration());
 
-    let Ok(file) = file else { return false; };
+    let Ok(file) = file else {
+        return false;
+    };
 
     let writer = BufWriter::new(file);
 
@@ -445,12 +531,23 @@ fn validate_not_blank(value: &str) -> Result<(), String> {
 }
 
 /// Validates a value is unique in a collection of values
-fn validate_unique<'a, V>(checked: &'a [V], what: &'a str) -> impl Fn(&str) -> Result<(), String> + 'a
-    where V: AsRef<str>
+fn validate_unique<'a, V>(
+    checked: &'a [V],
+    what: &'a str,
+) -> impl Fn(&str) -> Result<(), String> + 'a
+where
+    V: AsRef<str>,
 {
-    move |value: &str| if checked.iter().any(|v| v.as_ref().eq_ignore_ascii_case(value)) {
-        Err(String::from(&format!("{value:?} already exists, {what} values must be unique")))
-    } else {
-        Ok(())
+    move |value: &str| {
+        if checked
+            .iter()
+            .any(|v| v.as_ref().eq_ignore_ascii_case(value))
+        {
+            Err(String::from(&format!(
+                "{value:?} already exists, {what} values must be unique"
+            )))
+        } else {
+            Ok(())
+        }
     }
 }

@@ -40,9 +40,10 @@ impl<'a> Iterator for BuildsWalker<'a> {
                     }
                 }
                 Err(err) => {
-                    display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for build artifacts: {err}", self.path.to_string_lossy())
-                    );
+                    display_error_and_exit(&format!(
+                        "Exception while searching \"{}\" for build artifacts: {err}",
+                        self.path.to_string_lossy()
+                    ));
                 }
             }
         }
@@ -73,13 +74,17 @@ impl<'a> BuildsWalker<'a> {
                 }
 
                 if let Ok(files) = read_dir(&parent) {
-                    if files.filter(
-                        |v| v.as_ref().is_ok_and(|file| {
-                            let file_name = file.file_name().to_string_lossy().to_lowercase();
+                    if files
+                        .filter(|v| {
+                            v.as_ref().is_ok_and(|file| {
+                                let file_name = file.file_name().to_string_lossy().to_lowercase();
 
-                            platform.associated.iter().any(|f| f.matches(&file_name))
+                                platform.associated.iter().any(|f| f.matches(&file_name))
+                            })
                         })
-                    ).count() > 0 {
+                        .count()
+                        > 0
+                    {
                         return Some(BuildArtifacts {
                             name: &platform.name,
                             folder: entry.path().to_string_lossy().to_string(),

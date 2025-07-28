@@ -103,7 +103,8 @@ macro_rules! ok {
     };
 }
 
-static RE_MAIN_OR_MASTER: once_cell::sync::OnceCell<regex::Regex> = once_cell::sync::OnceCell::new();
+static RE_MAIN_OR_MASTER: once_cell::sync::OnceCell<regex::Regex> =
+    once_cell::sync::OnceCell::new();
 
 pub fn list_repos<P: AsRef<Path>>(path: P) {
     repos_handler(
@@ -155,7 +156,9 @@ pub fn list_repos_that_are_init_only<P: AsRef<Path>>(path: P) {
         |repo, repo_path| {
             let init_only = repo_is_init_only(repo);
 
-            if init_only { println!("{repo_path}"); }
+            if init_only {
+                println!("{repo_path}");
+            }
 
             (init_only, Message::None)
         },
@@ -218,16 +221,13 @@ pub fn list_outdated_repos<P: AsRef<Path>>(path: P, filter: OutdatedFilter, only
             let branches = ok!(hndlr; repo.branches(Some(BranchType::Local)), repo_path);
             let branches = filter_main_branches(branches, only_main);
 
-            let result = check_branch_status(
-                branches, repo, repo_path,
-                |branch, upstream| {
-                    match filter {
-                        OutdatedFilter::Ahead => branch > upstream,
-                        OutdatedFilter::Either => branch != upstream,
-                        OutdatedFilter::Behind => branch < upstream,
-                    }
-                },
-            ).any(|found| found);
+            let result =
+                check_branch_status(branches, repo, repo_path, |branch, upstream| match filter {
+                    OutdatedFilter::Ahead => branch > upstream,
+                    OutdatedFilter::Either => branch != upstream,
+                    OutdatedFilter::Behind => branch < upstream,
+                })
+                .any(|found| found);
 
             (result, Message::None)
         },
@@ -245,10 +245,10 @@ pub fn list_up_to_date_repos<P: AsRef<Path>>(path: P, only_main: bool) {
             let branches = ok!(hndlr; repo.branches(Some(BranchType::Local)), repo_path);
             let branches = filter_main_branches(branches, only_main);
 
-            let result = check_branch_status(
-                branches, repo, repo_path,
-                |branch, upstream| branch == upstream,
-            ).all(|found| found);
+            let result = check_branch_status(branches, repo, repo_path, |branch, upstream| {
+                branch == upstream
+            })
+            .all(|found| found);
 
             (result, Message::None)
         },
@@ -275,39 +275,36 @@ fn fetch_all_remotes(repo: &Repository, repo_path: &str) -> Result<(), Error> {
 }
 
 fn check_branch_status<'a>(
-    branches: impl IntoIterator<Item=Result<(Branch<'a>, BranchType), Error>> + 'a,
+    branches: impl IntoIterator<Item = Result<(Branch<'a>, BranchType), Error>> + 'a,
     repo: &'a Repository,
     repo_path: &'a str,
     predicate: impl Fn(usize, usize) -> bool + 'a,
-) -> impl Iterator<Item=bool> + 'a {
-    branches.into_iter()
-        .filter_map(move |branch| {
-            let (branch, _) = branch.ok()?;
-            let upstream = branch.upstream().ok()?;
-            let oid = branch.into_reference().target()?;
-            let upstream_oid = upstream.into_reference().target()?;
-            let (branch, upstream) = ok!(opt; repo.graph_ahead_behind(oid, upstream_oid), repo_path);
+) -> impl Iterator<Item = bool> + 'a {
+    branches.into_iter().filter_map(move |branch| {
+        let (branch, _) = branch.ok()?;
+        let upstream = branch.upstream().ok()?;
+        let oid = branch.into_reference().target()?;
+        let upstream_oid = upstream.into_reference().target()?;
+        let (branch, upstream) = ok!(opt; repo.graph_ahead_behind(oid, upstream_oid), repo_path);
 
-            Some(predicate(branch, upstream))
-        })
+        Some(predicate(branch, upstream))
+    })
 }
 
 fn authenticated_remotes<'a>(
     remotes: &'a StringArray,
     repo: &'a Repository,
     repo_path: &'a str,
-) -> impl Iterator<Item=Remote<'a>> {
-    remotes.into_iter().filter_map(
-        move |remote_url| {
-            let mut remote = repo.find_remote(remote_url.unwrap_or_default()).ok()?;
+) -> impl Iterator<Item = Remote<'a>> {
+    remotes.into_iter().filter_map(move |remote_url| {
+        let mut remote = repo.find_remote(remote_url.unwrap_or_default()).ok()?;
 
-            ok!(opt; remote.connect_auth(
+        ok!(opt; remote.connect_auth(
                 Direction::Fetch, Some(credentials()), None
             ), repo_path);
 
-            Some(remote)
-        }
-    )
+        Some(remote)
+    })
 }
 
 fn credentials<'a>() -> RemoteCallbacks<'a> {
@@ -323,8 +320,9 @@ fn credentials<'a>() -> RemoteCallbacks<'a> {
 }
 
 fn filter_main_branches(
-    branches: Branches, only_main: bool,
-) -> impl Iterator<Item=Result<(Branch<'_>, BranchType), Error>> {
+    branches: Branches,
+    only_main: bool,
+) -> impl Iterator<Item = Result<(Branch<'_>, BranchType), Error>> {
     branches.filter(move |branch| {
         if only_main && !branch.is_err() {
             let main_branch = re_main_or_master();
@@ -341,16 +339,16 @@ fn filter_main_branches(
     })
 }
 
-fn find_local_branch<'a, P>(
-    repo: &'a Repository,
-    predicate: P,
-) -> Result<Option<Branch<'a>>, Error>
-    where P: Fn(&'_ str) -> bool + 'a + Copy,
+fn find_local_branch<'a, P>(repo: &'a Repository, predicate: P) -> Result<Option<Branch<'a>>, Error>
+where
+    P: Fn(&'_ str) -> bool + 'a + Copy,
 {
     let mut branches = repo.branches(Some(BranchType::Local))?;
 
     let branch = branches.find(|branch| {
-        let Ok((branch, _)) = branch else { return false; };
+        let Ok((branch, _)) = branch else {
+            return false;
+        };
 
         branch.name().unwrap_or_default().is_some_and(predicate)
     });
@@ -382,8 +380,8 @@ fn get_config() -> Result<Config, Error> {
             Ok(path) => path,
             Err(_) => match Config::find_system() {
                 Ok(path) => path,
-                Err(_) => Config::find_global()?
-            }
+                Err(_) => Config::find_global()?,
+            },
         };
 
         Config::open(config_path.as_path())
@@ -395,13 +393,13 @@ fn re_main_or_master() -> &'static Regex {
 }
 
 fn repos_handler<P, S, H, OE, E, NF>(path: P, handler: H, on_error: Option<&OE>, not_found: NF)
-    where
-        P: AsRef<Path>,
-        S: AsRef<str>,
-        H: Fn(&'_ Repository, &'_ str) -> (bool, Option<S>) + Sync,
-        OE: Fn(Error, &'_ str) -> bool + Sync,
-        E: AsRef<str>,
-        NF: Fn() -> E,
+where
+    P: AsRef<Path>,
+    S: AsRef<str>,
+    H: Fn(&'_ Repository, &'_ str) -> (bool, Option<S>) + Sync,
+    OE: Fn(Error, &'_ str) -> bool + Sync,
+    E: AsRef<str>,
+    NF: Fn() -> E,
 {
     validate_path(&path);
 
@@ -449,11 +447,16 @@ fn repo_is_branched(repo: &Repository, repo_path: &str) -> Option<bool> {
     let main_branch = re_main_or_master();
 
     Some(
-        ok!(opt; repo.head(), repo_path).name()
-            .is_some_and(|head_name| !main_branch.is_match(head_name))
+        ok!(opt; repo.head(), repo_path)
+            .name()
+            .is_some_and(|head_name| !main_branch.is_match(head_name)),
     )
 }
 
 fn repo_is_init_only(repo: &Repository) -> bool {
-    if let Err(err) = repo.head() { err.code() == ErrorCode::UnbornBranch } else { false }
+    if let Err(err) = repo.head() {
+        err.code() == ErrorCode::UnbornBranch
+    } else {
+        false
+    }
 }

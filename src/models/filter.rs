@@ -27,7 +27,8 @@ impl AsRef<str> for Filter {
 
 impl Serialize for Filter {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         serializer.serialize_str(self.as_ref())
     }
@@ -35,7 +36,8 @@ impl Serialize for Filter {
 
 impl<'de> Deserialize<'de> for Filter {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where D: Deserializer<'de>
+    where
+        D: Deserializer<'de>,
     {
         let value = deserializer.deserialize_str(StringVisitor)?;
 
@@ -52,7 +54,10 @@ impl Visitor<'_> for StringVisitor {
         fmt.write_str("a string representing a file name, wildcards [*, ?] accepted")
     }
 
-    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E> where E: Error {
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
         Ok(value.to_string())
     }
 }

@@ -9,15 +9,17 @@ pub fn validate_path<P: AsRef<Path>>(path: P) {
     let path = path.as_ref();
 
     if !path.exists() {
-        display_error_and_exit(
-            &format!("path: \"{}\" - does not exist!\n", path.to_string_lossy())
-        );
+        display_error_and_exit(&format!(
+            "path: \"{}\" - does not exist!\n",
+            path.to_string_lossy()
+        ));
     }
 
     if path.is_file() {
-        display_error_and_exit(
-            &format!("path: \"{}\" - is not directory!\n", path.to_string_lossy())
-        );
+        display_error_and_exit(&format!(
+            "path: \"{}\" - is not directory!\n",
+            path.to_string_lossy()
+        ));
     }
 }
 
@@ -116,7 +118,8 @@ pub fn validate_platforms_filter(filter: &Selection, platforms: &[Platform]) {
 /// Validates all values in a list are unique by it's case insensitive string value
 #[inline]
 pub fn validate_unique_values<V>(values: &[V]) -> bool
-    where V: AsRef<str>
+where
+    V: AsRef<str>,
 {
     values.iter().map(|v| v.as_ref().to_lowercase()).collect::<HashSet<_>>().len() == values.len()
 }

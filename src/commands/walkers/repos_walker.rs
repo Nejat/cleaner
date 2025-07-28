@@ -58,23 +58,17 @@ impl ReposWalker {
         let path = entry.path();
         let walker = WalkDir::new(path).min_depth(1).max_depth(1);
 
-        if walker.into_iter().any(
-            |e| match e {
-                Ok(e) => {
-                    // if e.file_type().is_dir() && e.file_name() == ".git" {
-                    //     println!(">> {e:?} <<");
-                    // }
-
-                    e.file_type().is_dir() && e.file_name() == ".git"
-                }
-                Err(err) => {
-                    display_error_and_exit(&format!(
-                        "Exception while searching \"{}\" for git repositories: {err}",
-                        self.path.to_string_lossy()
-                    ));
-                }
+        if walker.into_iter().any(|e| match e {
+            Ok(e) => {
+                e.file_type().is_dir() && e.file_name() == ".git"
             }
-        ) {
+            Err(err) => {
+                display_error_and_exit(&format!(
+                    "Exception while searching \"{}\" for git repositories: {err}",
+                    self.path.to_string_lossy()
+                ));
+            }
+        }) {
             Some(path.to_path_buf())
         } else {
             None

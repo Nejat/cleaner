@@ -14,9 +14,11 @@ fn given_a_str_all_then_it_should_be_all() {
 fn given_a_str_of_select_comma_delimited_values_it_should_be_cleansed_select_values() {
     let expected = Selection::Select {
         values: vec![
-            String::from('a'), String::from('b'),
-            String::from('c'), String::from('d'),
-        ]
+            String::from('a'),
+            String::from('b'),
+            String::from('c'),
+            String::from('d'),
+        ],
     };
 
     let actual = Selection::from_str("a, b,c ,, d ").unwrap();
@@ -28,9 +30,11 @@ fn given_a_str_of_select_comma_delimited_values_it_should_be_cleansed_select_val
 fn given_a_str_of_select_comma_delimited_values_it_should_be_select_values() {
     let expected = Selection::Select {
         values: vec![
-            String::from('a'), String::from('b'),
-            String::from('c'), String::from('d'),
-        ]
+            String::from('a'),
+            String::from('b'),
+            String::from('c'),
+            String::from('d'),
+        ],
     };
 
     let actual = Selection::from_str("a,b,c,d").unwrap();
@@ -82,9 +86,7 @@ fn given_no_selected_it_should_pluralize() {
 #[test]
 fn given_one_selected_it_should_not_pluralize() {
     let sut = Selection::Select {
-        values: vec![
-            String::from("one")
-        ]
+        values: vec![String::from("one")],
     };
     let actual = sut.pluralize("s");
     let expected = "";
@@ -104,7 +106,9 @@ fn given_select_when_choosing_it_should_choose_select_value() {
 #[test]
 fn given_selected_checking_a_value_should_match_if_exists() {
     let expected = true;
-    let sut = Selection::Select { values: vec![String::from("value")] };
+    let sut = Selection::Select {
+        values: vec![String::from("value")],
+    };
     let actual = sut.matches("value");
 
     assert_eq!(expected, actual);
@@ -113,7 +117,9 @@ fn given_selected_checking_a_value_should_match_if_exists() {
 #[test]
 fn given_selected_checking_a_value_should_not_match_if_does_not_exists() {
     let expected = false;
-    let sut = Selection::Select { values: vec![String::from("value")] };
+    let sut = Selection::Select {
+        values: vec![String::from("value")],
+    };
     let actual = sut.matches("other value");
 
     assert_eq!(expected, actual);
@@ -122,9 +128,7 @@ fn given_selected_checking_a_value_should_not_match_if_does_not_exists() {
 #[test]
 fn given_selected_it_should_display_selected() {
     let sut = Selection::Select {
-        values: vec![
-            String::from("one"), String::from("two"),
-        ]
+        values: vec![String::from("one"), String::from("two")],
     };
 
     let actual = format!("{sut}");
@@ -136,9 +140,7 @@ fn given_selected_it_should_display_selected() {
 #[test]
 fn given_selected_it_should_pluralize() {
     let sut = Selection::Select {
-        values: vec![
-            String::from("one"), String::from("two"),
-        ]
+        values: vec![String::from("one"), String::from("two")],
     };
 
     let actual = sut.pluralize("s");

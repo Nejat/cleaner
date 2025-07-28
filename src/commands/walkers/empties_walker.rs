@@ -55,9 +55,10 @@ impl Iterator for EmptiesWalker {
                     }
                 }
                 Err(err) => {
-                    display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for empties: {err}", self.path.to_string_lossy())
-                    );
+                    display_error_and_exit(&format!(
+                        "Exception while searching \"{}\" for empties: {err}",
+                        self.path.to_string_lossy()
+                    ));
                 }
             }
         }
@@ -77,16 +78,15 @@ impl EmptiesWalker {
     fn is_folder_empty(&self, entry: &DirEntry) -> Option<PathBuf> {
         let path = entry.path();
 
-        if WalkDir::new(path).into_iter().any(
-            |e| match e {
-                Ok(e) => e.file_type().is_file(),
-                Err(err) => {
-                    display_error_and_exit(
-                        &format!("Exception while searching \"{}\" for empties: {err}", self.path.to_string_lossy())
-                    );
-                }
+        if WalkDir::new(path).into_iter().any(|e| match e {
+            Ok(e) => e.file_type().is_file(),
+            Err(err) => {
+                display_error_and_exit(&format!(
+                    "Exception while searching \"{}\" for empties: {err}",
+                    self.path.to_string_lossy()
+                ));
             }
-        ) {
+        }) {
             None
         } else {
             Some(path.to_path_buf())
