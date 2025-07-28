@@ -3,7 +3,7 @@ use std::fs::{remove_file, OpenOptions};
 use std::io::BufWriter;
 use std::sync::Once;
 
-use inquire::validator::StringValidator;
+use inquire::validator::{ErrorMessage, StringValidator, Validation};
 use inquire::{Confirm, MultiSelect, Select, Text};
 
 use crate::models::Filter;
@@ -12,6 +12,8 @@ use crate::utils::{
     validate_platform, validate_unique_values,
 };
 use crate::{Platform, PLATFORMS};
+
+type ValidationResult = Result<Validation, Box<dyn std::error::Error + Send + Sync>>;
 
 /// Manage supported platforms configuration
 pub fn manage_configuration() {
@@ -149,7 +151,7 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
         return false;
     };
 
-    let folders = get_a_collection_of_input("Add build artifact", &[], true, true);
+    let folders = get_a_collection_of_input("Add build artifact", &[], true);
 
     if folders.is_empty() {
         eprintln!("\nYou must provide at least one build artifact\n");
@@ -160,7 +162,6 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
         "Add file or folder name that identifies platform",
         &[],
         false,
-        true,
     )
     .into_iter()
     .map(Filter::new)
@@ -192,11 +193,11 @@ fn add_new_platform(platforms: &mut Vec<Platform>) -> bool {
 }
 
 /// Prompts user to select a platform configuration name
-fn get_platform_name(platforms: &[Platform], initial_value: &str) -> Option<String> {
+fn get_platform_name<'a>(platforms: &'a [Platform], initial_value: &'a str) -> Option<String> {
     Text::new("Platform name:")
-        .with_validator(&validate_not_blank)
-        .with_validator(&validate_no_spaces)
-        .with_validator(&validate_unique(platforms, "platform"))
+        .with_validator(NotBlank)
+        .with_validator(NoSpaces)
+        // .with_validator(UniqueValues::new(platforms, "platform"))
         .with_initial_value(initial_value)
         .prompt()
         .ok()
@@ -284,11 +285,9 @@ where
 
 /// Prompts and receives a collection of user input, supports input string validation
 fn get_a_collection_of_input(
-    prompt: &str,
-    validators: &[StringValidator],
-    required: bool,
-    unique: bool,
-) -> Vec<String> {
+    prompt: &str, validators: &[Box<dyn StringValidator>], required: bool
+) -> Vec<String>
+{
     const AT_LEAST_ONE: &str = "Requires at least one value";
     const BLANK_TO_END: &str = "Leave blank to end";
 
@@ -301,14 +300,10 @@ fn get_a_collection_of_input(
             .with_help_message(message)
             .with_validators(validators);
 
-        let value = if unique {
-            let new_values = collection.values().cloned().collect::<Vec<_>>();
-            let unique_validator = &validate_unique(&new_values, "");
+        let new_values = collection.values().cloned().collect::<Vec<_>>();
+        let unique_validator = UniqueValues::new(&new_values, "");
 
-            input.with_validator(unique_validator).prompt()
-        } else {
-            input.prompt()
-        };
+        let value = input.with_validator(unique_validator).prompt();
 
         match value {
             Ok(input) if input.trim().is_empty() => break,
@@ -388,9 +383,8 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             ADD_ARTIFACT => {
                 let artifacts = get_a_collection_of_input(
                     "Add new artifacts",
-                    &[&validate_unique(&modified_platform.folders, "artifacts")],
+                    &[Box::new(UniqueValues::new(&modified_platform.folders, "artifacts"))],
                     false,
-                    true,
                 );
 
                 for artifact in artifacts {
@@ -403,12 +397,8 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
             ADD_ASSOCIATED => {
                 let associated = get_a_collection_of_input(
                     "Add new associated",
-                    &[&validate_unique(
-                        &modified_platform.associated,
-                        "associated",
-                    )],
+                    &[Box::new(UniqueValues::new(&modified_platform.associated, "associated"))],
                     false,
-                    true,
                 );
 
                 for item in associated {
@@ -512,42 +502,58 @@ fn save_platforms(platforms: &[Platform]) -> bool {
     }
 }
 
-/// Validates a value does not contain spaces
-fn validate_no_spaces(value: &str) -> Result<(), String> {
-    if value.contains(' ') {
-        Err(String::from("Can not contain spaces"))
-    } else {
-        Ok(())
+/// Validates a value is not empty or blanks only
+#[derive(Clone)]
+struct NotBlank;
+
+impl StringValidator for NotBlank {
+    fn validate(&self, value: &str) -> ValidationResult {
+        if value.trim().is_empty() {
+            Ok(Validation::Invalid(ErrorMessage::Custom(String::from("Can not be blank"))))
+        } else {
+            Ok(Validation::Valid)
+        }
     }
 }
 
-/// Validates a value is no empty or blanks only
-fn validate_not_blank(value: &str) -> Result<(), String> {
-    if value.trim().is_empty() {
-        Err(String::from("Can not be blank"))
-    } else {
-        Ok(())
+/// Validates a value does not contain spaces
+#[derive(Clone)]
+struct NoSpaces;
+
+impl StringValidator for NoSpaces {
+    fn validate(&self, value: &str) -> ValidationResult {
+        if value.contains(' ') {
+            Ok(Validation::Invalid(ErrorMessage::Custom(String::from("Can not contain spaces"))))
+        } else {
+            Ok(Validation::Valid)
+        }
     }
 }
 
 /// Validates a value is unique in a collection of values
-fn validate_unique<'a, V>(
+#[derive(Clone)]
+struct UniqueValues<'a, V> {
     checked: &'a [V],
     what: &'a str,
-) -> impl Fn(&str) -> Result<(), String> + 'a
+}
+
+impl<'a, V> UniqueValues<'a, V> {
+    fn new(checked: &'a [V], what: &'a str) -> Self {
+        Self { checked, what }
+    }
+}
+
+impl<'a, V> StringValidator for UniqueValues<'a, V>
 where
-    V: AsRef<str>,
+    V: AsRef<str> + Clone
 {
-    move |value: &str| {
-        if checked
-            .iter()
-            .any(|v| v.as_ref().eq_ignore_ascii_case(value))
-        {
-            Err(String::from(&format!(
-                "{value:?} already exists, {what} values must be unique"
-            )))
+    fn validate(&self, value: &str) -> ValidationResult {
+        if self.checked.iter().any(|v| v.as_ref().eq_ignore_ascii_case(value)) {
+            Ok(Validation::Invalid(ErrorMessage::Custom(String::from(&format!(
+                "{value:?} already exists, {} values must be unique", self.what
+            )))))
         } else {
-            Ok(())
+            Ok(Validation::Valid)
         }
     }
 }
