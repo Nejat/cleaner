@@ -72,9 +72,9 @@ fn main() {
         Commands::Builds(Builds::Remove { path, types, confirmed }) =>
             remove_build_artifacts(path, types, &PLATFORMS, *confirmed),
         Commands::Empties(Empties::List { path, hidden }) =>
-            list_empties(path, *hidden),
+            list_empties(path, *hidden, &PLATFORMS),
         Commands::Empties(Empties::Remove { path, confirmed, hidden }) =>
-            remove_empties(path, *confirmed, *hidden),
+            remove_empties(path, *confirmed, *hidden, &PLATFORMS),
         Commands::Supported(Supported::List) =>
             supported_platforms(&PLATFORMS),
         Commands::Supported(Supported::Path) =>

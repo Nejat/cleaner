@@ -398,7 +398,7 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
                 }
             }
             REMOVE_ARTIFACTS => {
-                delete_selected_entries(&mut modified_platform.folders, "artifacts")
+                delete_selected_entries(&mut modified_platform.folders, "artifacts");
             }
             ADD_ASSOCIATED => {
                 let associated = get_a_collection_of_input(
@@ -416,7 +416,7 @@ fn modify_a_platform(platforms: &mut [Platform]) -> bool {
                 }
             }
             REMOVE_ASSOCIATED => {
-                delete_selected_entries(&mut modified_platform.associated, "associated")
+                delete_selected_entries(&mut modified_platform.associated, "associated");
             }
             ACCEPT => {
                 if validate_platform(&modified_platform) {

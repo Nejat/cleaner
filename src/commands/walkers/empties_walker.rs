@@ -5,7 +5,7 @@ use walkdir::{DirEntry, IntoIter, WalkDir};
 use crate::utils::display_error_and_exit;
 
 /// Recursively walks the folders in a path looking for empties
-pub struct EmptiesWalker {
+pub struct EmptiesWalker<'a> {
     /// Path to recursively walk
     pub path: PathBuf,
 
@@ -14,9 +14,10 @@ pub struct EmptiesWalker {
 
     /// `WalkDir` iterator
     pub walker: IntoIter,
+    pub skipped: &'a [&'a str],
 }
 
-impl Iterator for EmptiesWalker {
+impl Iterator for EmptiesWalker<'_> {
     type Item = PathBuf;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -30,9 +31,16 @@ impl Iterator for EmptiesWalker {
                         continue;
                     }
 
-                    let hidden_folder = entry.path()
-                        .file_name()
-                        .is_some_and(|p| p.to_str().is_some_and(|s| s.starts_with('.')));
+                    let folder_name = entry.file_name().to_string_lossy();
+                    let git_folder = folder_name == ".git";
+
+                    // skip git folders
+                    if git_folder {
+                        self.walker.skip_current_dir();
+                        continue;
+                    }
+
+                    let hidden_folder = folder_name.starts_with('.');
 
                     // skip hidden entries if skip empty hidden entry
                     if hidden_folder && !self.show_hidden {
@@ -40,13 +48,18 @@ impl Iterator for EmptiesWalker {
                         continue;
                     }
 
-                    let empties = self.is_folder_empty(&entry);
+                    if self.skipped.iter().any(|skip| folder_name == *skip) {
+                        self.walker.skip_current_dir();
+                        continue;
+                    }
+
+                    let empty = self.is_folder_empty(&entry);
 
                     // hidden or not iterate empty entry
-                    if empties.is_some() {
+                    if empty.is_some() {
                         self.walker.skip_current_dir();
 
-                        return empties;
+                        return empty;
                     }
 
                     // skip hidden entry that is not empty
@@ -65,12 +78,16 @@ impl Iterator for EmptiesWalker {
     }
 }
 
-impl EmptiesWalker {
-    pub fn new<P: AsRef<Path>>(path: P, show_hidden: bool) -> Self {
+impl<'a> EmptiesWalker<'a> {
+    pub fn new<P: AsRef<Path>>(
+        path: P, show_hidden: bool,
+        skipped: &'a [&'a str],
+    ) -> Self {
         Self {
             path: path.as_ref().to_path_buf(),
             show_hidden,
             walker: WalkDir::new(path).into_iter(),
+            skipped,
         }
     }
 
