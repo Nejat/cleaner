@@ -1,5 +1,5 @@
 use std::fs::remove_dir_all;
-use std::path::{MAIN_SEPARATOR, Path, PathBuf};
+use std::path::{Path, PathBuf, MAIN_SEPARATOR};
 
 use crate::commands::walkers::EmptiesWalker;
 use crate::utils::{display_error_and_exit, get_confirmation, validate_path};

@@ -1,14 +1,14 @@
 use std::collections::{HashMap, HashSet};
-use std::fs::{OpenOptions, remove_file};
+use std::fs::{remove_file, OpenOptions};
 use std::io::BufWriter;
 use std::sync::Once;
 
-use inquire::{Confirm, MultiSelect, Select, Text};
 use inquire::validator::StringValidator;
+use inquire::{Confirm, MultiSelect, Select, Text};
 
-use crate::{Platform, PLATFORMS};
 use crate::models::Filter;
 use crate::utils::{display_error_and_exit, list_output, path_of_supported_platforms_configuration, validate_platform, validate_unique_values};
+use crate::{Platform, PLATFORMS};
 
 /// Manage supported platforms configuration
 pub fn manage_configuration() {

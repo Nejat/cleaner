@@ -3,9 +3,9 @@ use std::path::{Path, PathBuf};
 
 use walkdir::{DirEntry, IntoIter, WalkDir};
 
-use crate::{Platform, Selection};
 use crate::models::BuildArtifacts;
 use crate::utils::display_error_and_exit;
+use crate::{Platform, Selection};
 
 /// Recursively walks the folders in a path looking for build artifacts
 pub struct BuildsWalker<'a> {

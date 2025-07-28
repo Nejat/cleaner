@@ -1,10 +1,10 @@
 use std::fs::remove_dir_all;
-use std::path::{MAIN_SEPARATOR, Path};
+use std::path::{Path, MAIN_SEPARATOR};
 
-use crate::{Platform, Selection};
 use crate::commands::walkers::BuildsWalker;
 use crate::models::BuildArtifacts;
 use crate::utils::{display_error_and_exit, get_confirmation, validate_path, validate_platforms_filter};
+use crate::{Platform, Selection};
 
 /// Lists matching build artifacts
 pub fn list_build_artifacts<P: AsRef<Path>>(path: P, filter: &Selection, platforms: &[Platform]) {

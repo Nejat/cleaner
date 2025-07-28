@@ -23,13 +23,13 @@ use once_cell::sync::Lazy;
 use commands::builds::list_build_artifacts;
 use commands::builds::remove_build_artifacts;
 
-use crate::cli::CLI;
 use crate::cli::commands::builds::Builds;
-use crate::cli::commands::Commands;
 use crate::cli::commands::empties::Empties;
 use crate::cli::commands::repos::Repos;
 use crate::cli::commands::supported::Supported;
+use crate::cli::commands::Commands;
 use crate::cli::selection::Selection;
+use crate::cli::CLI;
 use crate::commands::empties::{list_empties, remove_empties};
 use crate::commands::repos::{
     list_outdated_repos, list_repos, list_repos_that_are_branched,

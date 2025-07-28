@@ -1,7 +1,7 @@
 use std::fmt::Formatter;
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::de::{Error, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use wildmatch::WildMatch;
 
 #[derive(Debug, Clone)]

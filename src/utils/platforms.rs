@@ -1,13 +1,13 @@
 use std::env::current_exe;
-use std::fs::{File, remove_file};
 use std::fs;
+use std::fs::{remove_file, File};
 use std::io::BufReader;
 use std::path::PathBuf;
 
 use inquire::Confirm;
 
-use crate::Platform;
 use crate::utils::{display_error_and_exit, validate_platforms};
+use crate::Platform;
 
 /// Loads a configuration of supported platforms
 pub fn load_supported_platforms() -> Vec<Platform> {

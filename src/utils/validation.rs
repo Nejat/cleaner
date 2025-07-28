@@ -1,8 +1,8 @@
 use std::collections::HashSet;
 use std::path::Path;
 
-use crate::{Platform, Selection, supported_platforms, utils};
 use crate::utils::{display_error_and_exit, list_output};
+use crate::{supported_platforms, utils, Platform, Selection};
 
 /// Validates a given path exists and it is a folder
 pub fn validate_path<P: AsRef<Path>>(path: P) {
