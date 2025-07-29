@@ -32,6 +32,12 @@ impl Iterator for EmptiesWalker<'_> {
                     }
 
                     let folder_name = entry.file_name().to_string_lossy();
+
+                    // don't skip current dir
+                    if folder_name == "." {
+                        continue;
+                    }
+
                     let git_folder = folder_name == ".git";
 
                     // skip git folders
